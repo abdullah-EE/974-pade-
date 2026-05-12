@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, Text, TouchableOpacity } from 'react-native';
-import { colors } from '@/theme/tokens';
-export function FilterChips({items,selected,onSelect}:{items:string[];selected:string;onSelect:(v:string)=>void}){return <ScrollView horizontal showsHorizontalScrollIndicator={false}>{items.map(i=><TouchableOpacity key={i} style={[s.c,selected===i&&s.a]} onPress={()=>onSelect(selected===i?'':i)}><Text style={[s.t,selected===i&&s.at]}>{i}</Text></TouchableOpacity>)}</ScrollView>}
-const s=StyleSheet.create({c:{paddingHorizontal:12,paddingVertical:8,backgroundColor:'#1A2233',borderRadius:20,marginRight:8},a:{backgroundColor:colors.gold},t:{color:'#D9DFE8'},at:{color:'#2b1f08',fontWeight:'700'}})
+import { ScrollView, Pressable, Text, StyleSheet } from 'react-native';
+import { colors, radius, spacing } from '@/theme/tokens';
+export function FilterChips({ items,active,onToggle }:{items:string[];active:string[];onToggle:(s:string)=>void}){return <ScrollView horizontal showsHorizontalScrollIndicator={false}>{items.map(i=><Pressable key={i} onPress={()=>onToggle(i)} style={[styles.c,active.includes(i)&&styles.a]}><Text style={[styles.t,active.includes(i)&&styles.at]}>{i}</Text></Pressable>)}</ScrollView>}
+const styles=StyleSheet.create({c:{paddingHorizontal:spacing.md,paddingVertical:spacing.xs,borderRadius:radius.pill,borderWidth:1,borderColor:colors.border,marginRight:8,backgroundColor:'#fff'},a:{backgroundColor:colors.primary,borderColor:colors.primary},t:{color:colors.textSecondary,fontWeight:'600'},at:{color:'#fff'}})
