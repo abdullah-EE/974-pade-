@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "974 Padel",
+    "slug": "pade-974",
+    "scheme": "pade974",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "plugins": ["expo-router"]
+  }
+}
