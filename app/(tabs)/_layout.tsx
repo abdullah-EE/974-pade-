@@ -32,7 +32,6 @@ export default function TabsLayout() {
       <Tabs.Screen name="submit" options={{ title: 'Submit', tabBarIcon: icon('plus-circle-outline') }} />
       <Tabs.Screen name="challenges" options={{ title: 'Challenges', tabBarIcon: icon('lightning-bolt-outline') }} />
       <Tabs.Screen name="profile" options={{ title: 'Profile', tabBarIcon: icon('account-outline') }} />
-      <Tabs.Screen name="matches" options={{ href: null }} />
       <Tabs.Screen name="index" options={{ href: null }} />
     </Tabs>
   );
