@@ -1,11 +1,10 @@
+import { Image, StyleSheet, Text, View } from 'react-native';
 import { useState } from 'react';
-import { Image, ImageStyle, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { colors } from '@/theme/tokens';
 
-export function ImageWithFallback({ uri, style, label='974 Padel' }: { uri: string; style: ImageStyle; label?: string }) {
-  const [failed, setFailed] = useState(false);
-  if (failed) return <View style={[style as ViewStyle, styles.fallback]}><Text style={styles.text}>{label}</Text></View>;
-  return <Image source={{ uri }} style={style} onError={() => setFailed(true)} />;
+export function ImageWithFallback({ uri, style }: { uri:string; style:any }) {
+  const [error,setError]=useState(false);
+  if(error) return <View style={[style,styles.fallback]}><Text style={styles.t}>974 Padel</Text></View>;
+  return <Image source={{uri}} style={style} onError={()=>setError(true)} />;
 }
-
-const styles = StyleSheet.create({ fallback: { backgroundColor: '#1A2438', alignItems: 'center', justifyContent: 'center' }, text: { color: colors.sand, fontWeight: '700' } });
+const styles=StyleSheet.create({fallback:{backgroundColor:colors.deep,justifyContent:'center',alignItems:'center'},t:{color:'#fff',fontWeight:'700'}});
