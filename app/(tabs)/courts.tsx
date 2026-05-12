@@ -1,9 +1,8 @@
-import { Text, StyleSheet, View } from 'react-native';
-import { Screen } from '@/components/ui/Screen';
-import { courts } from '@/data/mock/data';
-import { colors } from '@/theme/tokens';
-
-export default function CourtsScreen() {
-  return <Screen><Text style={styles.title}>Courts</Text>{courts.map((c) => <View key={c.id} style={styles.card}><Text style={styles.text}>{c.name}</Text><Text style={styles.meta}>{c.area} • {c.indoor ? 'Indoor' : 'Outdoor'}</Text></View>)}</Screen>;
-}
-const styles = StyleSheet.create({ title: { color: colors.text, fontSize: 24, fontWeight: '700', marginBottom: 12 }, card: { backgroundColor: colors.surface, padding: 12, borderRadius: 12, marginBottom: 8 }, text: { color: colors.text }, meta: { color: colors.muted } });
+import { useMemo, useState } from 'react';
+import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { router } from 'expo-router';
+import { courts } from '@/data/mockData';
+import { colors, spacing } from '@/theme/tokens';
+const filters=['All','Lusail','Doha','The Pearl','West Bay','Aspire'];
+export default function Courts(){const [q,setQ]=useState('');const [f,setF]=useState('All');const data=useMemo(()=>courts.filter(c=>(f==='All'||c.area===f)&&c.name.toLowerCase().includes(q.toLowerCase())),[q,f]);return <ScrollView style={styles.s} contentContainerStyle={{padding:spacing.lg}}><Text style={styles.t}>Courts</Text><TextInput value={q} onChangeText={setQ} placeholder='Search courts' placeholderTextColor={colors.muted} style={styles.in}/><ScrollView horizontal showsHorizontalScrollIndicator={false}>{filters.map(x=><TouchableOpacity key={x} onPress={()=>setF(x)} style={[styles.chip,f===x&&styles.active]}><Text style={[styles.chipT,f===x&&styles.activeT]}>{x}</Text></TouchableOpacity>)}</ScrollView>{data.map(c=><TouchableOpacity key={c.id} style={styles.card} onPress={()=>router.push(`/court/${c.id}`)}><Text style={styles.n}>{c.name}</Text><Text style={styles.meta}>{c.area} • {c.indoor?'Indoor':'Outdoor'} • {c.courts} courts</Text><Text style={styles.meta}>{c.price} {c.ranked?'• Ranked Match Venue':''}</Text></TouchableOpacity>)}</ScrollView>}
+const styles=StyleSheet.create({s:{flex:1,backgroundColor:colors.background},t:{color:colors.text,fontSize:28,fontWeight:'800'},in:{marginVertical:10,backgroundColor:colors.surface,padding:12,borderRadius:12,color:colors.text,borderWidth:1,borderColor:colors.border},chip:{padding:8,paddingHorizontal:12,marginRight:8,borderRadius:16,backgroundColor:colors.surfaceAlt},active:{backgroundColor:colors.gold},chipT:{color:colors.text},activeT:{color:'#241b08',fontWeight:'700'},card:{backgroundColor:colors.card,padding:14,borderRadius:14,marginTop:10,borderWidth:1,borderColor:colors.border},n:{color:colors.text,fontWeight:'700'},meta:{color:colors.muted,marginTop:2}})

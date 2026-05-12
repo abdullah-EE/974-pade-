@@ -1,23 +1,10 @@
-import { Text, StyleSheet } from 'react-native';
-import { Screen } from '@/components/ui/Screen';
-import { Card } from '@/components/ui/Card';
+import { ImageBackground, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { router } from 'expo-router';
+import { AppCard } from '@/components/common/AppCard';
+import { AppButton } from '@/components/common/AppButton';
+import { ScreenHeader } from '@/components/common/ScreenHeader';
+import { challenges, courts, matches, players } from '@/data/mockData';
 import { colors, spacing } from '@/theme/tokens';
-import { me, challenges } from '@/data/mock/data';
 
-export default function HomeScreen() {
-  return (
-    <Screen>
-      <Text style={styles.title}>974 Padel</Text>
-      <Card><Text style={styles.big}>Rank #{me.rank}</Text><Text style={styles.text}>Movement: +{me.movement} this week • Form {me.form}</Text></Card>
-      <Card><Text style={styles.cta}>Submit Match</Text><Text style={styles.text}>Primary action</Text></Card>
-      <Card><Text style={styles.text}>Pending challenges: {challenges.length}</Text></Card>
-    </Screen>
-  );
-}
-
-const styles = StyleSheet.create({
-  title: { color: colors.text, fontSize: 28, fontWeight: '700', marginBottom: spacing.md },
-  big: { color: colors.primary, fontSize: 24, fontWeight: '700' },
-  text: { color: colors.text, marginTop: 6 },
-  cta: { color: colors.text, fontSize: 18, fontWeight: '600' }
-});
+export default function Home(){const me=players[6];return <ScrollView style={styles.s} contentContainerStyle={{padding:spacing.lg}}><ImageBackground source={{uri:'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=1200&q=80'}} style={styles.hero} imageStyle={{borderRadius:18}}><View style={styles.overlay}/><Text style={styles.heroTitle}>Climb Qatar's Padel Leaderboard</Text></ImageBackground><AppCard><ScreenHeader title={`Rank #${me.rank}`} subtitle={`Rating ${me.rating} • Win rate ${Math.round(me.wins/(me.wins+me.losses)*100)}%`} /><View style={styles.row}><AppButton label='Submit Match' onPress={()=>router.push('/submit')} /><View style={{width:8}}/><AppButton label='Challenge Player' variant='secondary' onPress={()=>router.push('/challenges')} /></View></AppCard><AppCard><Text style={styles.h2}>Top 5 Preview</Text>{players.slice(0,5).map(p=><Text key={p.id} style={styles.item}>#{p.rank} {p.name} • {p.rating}</Text>)}</AppCard><AppCard><Text style={styles.h2}>Upcoming Challenge</Text><Text style={styles.item}>{challenges[0].status} • {challenges[0].date}</Text></AppCard><AppCard><Text style={styles.h2}>Recent Match</Text><Text style={styles.item}>{matches[0].score} • {matches[0].status}</Text></AppCard><AppCard><Text style={styles.h2}>Featured Court</Text><Text style={styles.item}>{courts[0].name} • {courts[0].area}</Text></AppCard><AppCard><Text style={styles.h2}>Verification</Text><Text style={styles.item}>Pending / Verified / Location Verified</Text></AppCard></ScrollView>}
+const styles=StyleSheet.create({s:{flex:1,backgroundColor:colors.background},hero:{height:180,justifyContent:'flex-end',padding:16,marginBottom:16},overlay:{...StyleSheet.absoluteFillObject,backgroundColor:'rgba(0,0,0,.35)',borderRadius:18},heroTitle:{color:'white',fontWeight:'800',fontSize:26},row:{flexDirection:'row'},h2:{color:colors.sand,fontWeight:'700',marginBottom:8},item:{color:colors.text,paddingVertical:2}})
