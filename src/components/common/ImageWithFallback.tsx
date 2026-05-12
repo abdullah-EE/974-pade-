@@ -1,11 +1,18 @@
 import { useState } from 'react';
-import { Image, ImageStyle, StyleSheet, Text, View, ViewStyle } from 'react-native';
-import { colors } from '@/theme/tokens';
+import { StyleSheet, Text, View } from 'react-native';
+import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
 
-export function ImageWithFallback({ uri, style, label='974 Padel' }: { uri: string; style: ImageStyle; label?: string }) {
+export function ImageWithFallback({ uri, style }: { uri: string; style: any }) {
   const [failed, setFailed] = useState(false);
-  if (failed) return <View style={[style as ViewStyle, styles.fallback]}><Text style={styles.text}>{label}</Text></View>;
-  return <Image source={{ uri }} style={style} onError={() => setFailed(true)} />;
+  if (failed) {
+    return (
+      <LinearGradient colors={['#3A001D', '#8A1E4D']} style={[style, styles.center]}>
+        <Text style={styles.t}>974 Padel</Text>
+      </LinearGradient>
+    );
+  }
+  return <Image source={uri} style={style} contentFit="cover" transition={180} onError={() => setFailed(true)} />;
 }
 
-const styles = StyleSheet.create({ fallback: { backgroundColor: '#1A2438', alignItems: 'center', justifyContent: 'center' }, text: { color: colors.sand, fontWeight: '700' } });
+const styles = StyleSheet.create({ center: { justifyContent: 'center', alignItems: 'center' }, t: { color: '#fff', fontWeight: '700' } });
