@@ -1,8 +1,7 @@
+export type Area = 'Lusail' | 'Education City' | 'Katara' | 'Msheireb' | 'The Pearl' | 'West Bay' | 'Aspire' | 'Al Waab' | 'Al Sadd' | 'Umm Salal';
 export type Level = 'Beginner' | 'Intermediate' | 'Advanced';
-export type VerificationStatus = 'Pending' | 'Verified' | 'Location Verified' | 'Disputed';
-export type Area = 'Lusail' | 'Doha' | 'The Pearl' | 'West Bay' | 'Aspire';
 
-export interface Player { id:string; name:string; username:string; avatar:string; rank:number; rating:number; wins:number; losses:number; movement:number; level:Level; hand:'Right'|'Left'; side:'Forehand'|'Backhand'; verified:boolean; hotStreak?:boolean; }
-export interface Court { id:string; name:string; area:Area; indoor:boolean; courts:number; price:string; image:string; ranked:boolean; }
-export interface Match { id:string; playerA:string; playerB:string; score:string; winner:string; courtId:string; date:string; ratingDelta:number; status:VerificationStatus; proofImage:string; }
-export interface Challenge { id:string; from:string; to:string; status:'Incoming'|'Sent'|'Accepted'; date:string; }
+export interface Court { id: string; name: string; area: Area; indoor: boolean; image: string; amenities: string[]; timeSlots: string[]; }
+export interface Player { id: string; name: string; username: string; avatar: string; rank: number; rating: number; movement: number; level: Level; verified: boolean; favoriteCourt: string; wins:number; losses:number; }
+export interface Match { id: string; teamA: string[]; teamB: string[]; winner: 'A'|'B'; score: string; courtId: string; date: string; ratingChange: number; status: 'Pending'|'Verified'|'Disputed'; }
+export interface Challenge { id:string; from:string; to:string; courtId:string; date:string; status:'Incoming'|'Sent'|'Accepted'; }

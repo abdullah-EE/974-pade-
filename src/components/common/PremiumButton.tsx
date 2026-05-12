@@ -1,5 +1,7 @@
 import { Pressable, StyleSheet, Text } from 'react-native';
-import { colors } from '@/theme/tokens';
+import { colors, radius, spacing } from '@/theme/tokens';
 
-export function PremiumButton({title,onPress}:{title:string;onPress?:()=>void}){return <Pressable onPress={onPress} style={({pressed})=>[styles.btn,pressed&&{opacity:.8,transform:[{scale:.98}]}]}><Text style={styles.t}>{title}</Text></Pressable>}
-const styles=StyleSheet.create({btn:{backgroundColor:colors.gold,paddingVertical:10,paddingHorizontal:14,borderRadius:12},t:{color:'#261b07',fontWeight:'700'}})
+export function PremiumButton({ label, onPress, secondary=false }: { label:string; onPress:()=>void; secondary?:boolean }) {
+  return <Pressable onPress={onPress} style={({pressed})=>[styles.btn, secondary?styles.secondary:styles.primary, pressed&&{opacity:0.8}]}><Text style={[styles.txt, secondary&&{color:colors.primary}]}>{label}</Text></Pressable>;
+}
+const styles=StyleSheet.create({btn:{paddingVertical:spacing.sm,paddingHorizontal:spacing.md,borderRadius:radius.pill,alignItems:'center'},primary:{backgroundColor:colors.primary},secondary:{backgroundColor:colors.background,borderWidth:1,borderColor:colors.border},txt:{color:'#fff',fontWeight:'700'}});
