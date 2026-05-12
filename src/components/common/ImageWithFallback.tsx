@@ -1,4 +1,3 @@
-import { Image, StyleSheet, Text, View } from 'react-native';
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Image } from 'expo-image';
