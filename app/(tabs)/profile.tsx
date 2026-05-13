@@ -24,7 +24,7 @@ import { VideoPost, VideoTag } from '@/types/VideoPost';
 import { formatPlayerStatus, winRate } from '@/utils/format';
 
 export default function ProfileScreen() {
-  const { currentUser: me, players, courts, matches, challenges, friendIds, coaches, videos, wallet, cosmetics, activeCosmeticIds, updateMatchStatus, updateChallenge, requestCoachSession, previewCosmetic, selectCosmetic, buyCosmetic, toggleVideoLike, toggleVideoSave, createCoachProfile, uploadVideo } = useAppState();
+  const { currentUser: me, players, courts, matches, challenges, friendIds, coaches, videos, wallet, cosmetics, activeCosmeticIds, updateAccount, updateMatchStatus, updateChallenge, requestCoachSession, previewCosmetic, selectCosmetic, buyCosmetic, toggleVideoLike, toggleVideoSave, createCoachProfile, uploadVideo } = useAppState();
   const [sheet, setSheet] = useState<'edit' | 'settings' | 'premium' | 'coachSignup' | 'videoUpload' | null>(null);
   const [coachSheet, setCoachSheet] = useState<Coach | null>(null);
   const [videoSheet, setVideoSheet] = useState<VideoPost | null>(null);
@@ -86,6 +86,12 @@ export default function ProfileScreen() {
     setUploadMessage('Clip uploaded locally. +40 credits earned.');
     setSheet(null);
   };
+  const changeAvatar = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.85 });
+    if (!result.canceled) {
+      updateAccount({ avatarUri: result.assets[0].uri, avatarUrl: result.assets[0].uri });
+    }
+  };
 
   return (
     <ScreenTransitionWrapper>
@@ -102,6 +108,9 @@ export default function ProfileScreen() {
         <View style={[styles.avatarShell, hasPearlBorder && styles.avatarPearl, hasEliteBadge && styles.avatarElite]}>
           <PlayerAvatar name={me.name} uri={me.avatar} size={78} />
         </View>
+      </View>
+      <View style={styles.avatarActions}>
+        <PremiumButton label="Change avatar" icon="image-outline" variant="secondary" onPress={changeAvatar} />
       </View>
 
       <View style={styles.stats}>
@@ -355,6 +364,7 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
   content: { ...centeredContent, paddingBottom: 104, gap: 20 },
   header: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.primary, paddingTop: 58, paddingBottom: 24, paddingHorizontal: spacing.md },
+  avatarActions: { marginHorizontal: spacing.md, marginTop: -10 },
   headerLusail: { backgroundColor: '#3A001D', borderBottomWidth: 1, borderBottomColor: colors.hotPink },
   headerElite: { shadowColor: colors.hotPink, shadowOpacity: 0.42, shadowRadius: 22, shadowOffset: { width: 0, height: 14 }, elevation: 10 },
   avatarShell: { padding: 3, borderRadius: 999, borderWidth: 1, borderColor: 'rgba(255,255,255,0.16)' },

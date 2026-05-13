@@ -36,6 +36,7 @@ interface AppStateValue {
   friendIds: string[];
   createAccount: (account: LocalAccount) => void;
   loginAccount: (usernameOrEmail: string) => Promise<boolean>;
+  updateAccount: (patch: Partial<LocalAccount>) => void;
   addFriend: (id: string) => void;
   removeFriend: (id: string) => void;
   joinOpenGame: (id: string) => void;
@@ -145,6 +146,12 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     if (!stored) return false;
     setAccount(stored);
     return true;
+  };
+  const updateAccount = (patch: Partial<LocalAccount>) => {
+    if (!account) return;
+    const next = { ...account, ...patch };
+    setAccount(next);
+    accountService.saveAccount(next).catch(() => undefined);
   };
 
   const joinOpenGame = (id: string) => {
@@ -282,7 +289,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     return video;
   };
 
-  const value = { account, currentUser, players, courts, openGames, challenges, matches, coaches, videos, wallet, cosmetics, activeCosmeticIds, friendIds, createAccount, loginAccount, addFriend, removeFriend, joinOpenGame, createChallenge, updateChallenge, addMatch, updateMatchStatus, requestCoachSession, toggleVideoLike, toggleVideoSave, previewCosmetic, selectCosmetic, buyCosmetic, earnCredits, createCoachProfile, uploadVideo };
+  const value = { account, currentUser, players, courts, openGames, challenges, matches, coaches, videos, wallet, cosmetics, activeCosmeticIds, friendIds, createAccount, loginAccount, updateAccount, addFriend, removeFriend, joinOpenGame, createChallenge, updateChallenge, addMatch, updateMatchStatus, requestCoachSession, toggleVideoLike, toggleVideoSave, previewCosmetic, selectCosmetic, buyCosmetic, earnCredits, createCoachProfile, uploadVideo };
 
   return <AppStateContext.Provider value={value}>{hydrated ? children : null}</AppStateContext.Provider>;
 }
