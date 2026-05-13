@@ -1,12 +1,12 @@
 # 974 Padel Backend Phase 1
 
-The next build step is real accounts and social/ranking data, not payments.
+The next backend step is real accounts and social/ranking data, not payments.
 
 ## Business Logic To Prioritize
 
-- Player network first: accounts, profiles, friends, private invites, open games.
+- Player network first: accounts, profiles, friends, private invites, and open games.
 - Verified ranking loop: submit proof, opponent confirms, then rating and credits update.
-- Venue support second: courts, availability slots, external booking links.
+- Venue support second: courts, availability slots, and external booking links.
 - Content and coaching as retention loops: coach requests and video posts stay inside the five-tab app.
 - Monetization later: keep 974 Credits, cosmetics, premium entitlements, and ad flags in the model, but do not charge users yet.
 
