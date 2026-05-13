@@ -48,6 +48,7 @@ export default function ProfileScreen() {
   const hasLusailBg = equippedCosmetics.some((item) => item.id === 'lusail-bg');
   const hasVictoryFlash = equippedCosmetics.some((item) => item.id === 'victory-flash');
   const hasMaroonCard = equippedCosmetics.some((item) => item.id === 'maroon-card');
+  const activeCosmeticNames = equippedCosmetics.map((item) => item.name).slice(0, 5);
 
   const submitCoachSignup = () => {
     createCoachProfile({
@@ -124,7 +125,7 @@ export default function ProfileScreen() {
 
       <View style={styles.equippedBar}>
         <Text style={styles.panelTitle}>Equipped look</Text>
-        <Text style={styles.panelMeta}>{equippedCosmetics.map((item) => item.name).slice(0, 4).join(' - ') || 'Classic Frame'}</Text>
+        <Text style={styles.panelMeta}>{activeCosmeticNames.join(' - ') || 'Classic Frame'}</Text>
       </View>
 
       <CollapsibleSection title="Player Status" action="Ranking and form" defaultOpen>
@@ -223,7 +224,22 @@ export default function ProfileScreen() {
         </View>
       </CollapsibleSection>
 
-      <CollapsibleSection title="Customization" action={`${activeCosmeticIds.length} active`}>
+      <CollapsibleSection title="Customization" action={`${activeCosmeticIds.length} active`} defaultOpen>
+        <View style={[styles.cosmeticPreview, hasLusailBg && styles.previewLusail, hasVictoryFlash && styles.victoryGlow]}>
+          <View style={[styles.previewAvatar, hasPearlBorder && styles.avatarPearl, hasEliteBadge && styles.avatarElite]}>
+            <PlayerAvatar name={me.name} uri={me.avatar} size={64} />
+          </View>
+          <View style={{ flex: 1, minWidth: 0 }}>
+            <Text numberOfLines={1} style={styles.previewName}>{me.name}</Text>
+            <Text numberOfLines={1} style={styles.previewMeta}>#{me.rank} - {me.rating} rating</Text>
+            <View style={styles.previewBadges}>
+              {hasPearlBorder ? <Text style={styles.previewBadge}>Pearl border</Text> : null}
+              {hasEliteBadge ? <Text style={styles.previewBadge}>Elite badges</Text> : null}
+              {hasLusailBg ? <Text style={styles.previewBadge}>Lusail BG</Text> : null}
+              {hasVictoryFlash ? <Text style={styles.previewBadge}>Victory flash</Text> : null}
+            </View>
+          </View>
+        </View>
         <View style={styles.cosmeticGrid}>
           {cosmetics.map((item) => (
             <View key={item.id} style={[styles.cosmeticCard, activeCosmeticIds.includes(item.id) && styles.cosmeticActive]}>
@@ -356,6 +372,13 @@ const styles = StyleSheet.create({
   cosmeticSurface: { borderColor: colors.hotPink, backgroundColor: '#321020' },
   victoryGlow: { shadowColor: colors.hotPink, shadowOpacity: 0.35, shadowRadius: 18, shadowOffset: { width: 0, height: 12 }, elevation: 8 },
   equippedBar: { marginHorizontal: spacing.md, backgroundColor: colors.glass, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, padding: 14, gap: 6 },
+  cosmeticPreview: { marginHorizontal: spacing.md, flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#321020', borderRadius: radius.xl, borderWidth: 1, borderColor: colors.hotPink, padding: 14, shadowColor: colors.hotPink, shadowOpacity: 0.22, shadowRadius: 18, shadowOffset: { width: 0, height: 10 }, elevation: 7 },
+  previewLusail: { backgroundColor: '#3A001D' },
+  previewAvatar: { padding: 3, borderRadius: 999, borderWidth: 1, borderColor: colors.border },
+  previewName: { color: colors.pearl, fontWeight: '900', fontSize: 18 },
+  previewMeta: { color: colors.textSecondary, fontWeight: '800', marginTop: 3 },
+  previewBadges: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 9 },
+  previewBadge: { overflow: 'hidden', color: colors.pearl, backgroundColor: colors.softMaroon, borderRadius: radius.pill, paddingHorizontal: 8, paddingVertical: 4, fontWeight: '900', fontSize: 10 },
   progressHead: { flexDirection: 'row', justifyContent: 'space-between', gap: 10 },
   panelTitle: { color: colors.textPrimary, fontWeight: '900' },
   panelMeta: { color: colors.textSecondary, fontWeight: '700' },
