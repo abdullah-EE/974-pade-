@@ -5,7 +5,7 @@ export const friendService = {
   async listFriends(players: Player[], friendIds: string[]) {
     if (isSupabaseConfigured) {
       try {
-        return await supabaseRest.select<Player>('friendships', { status: 'eq.accepted' });
+        await supabaseRest.select('friendships', { status: 'eq.accepted' });
       } catch {
         // Local fallback.
       }
@@ -14,7 +14,11 @@ export const friendService = {
   },
   async sendRequest(userId: string, friendId: string) {
     if (isSupabaseConfigured) {
-      await supabaseRest.insert('friendships', { requester_id: userId, addressee_id: friendId, status: 'pending' });
+      try {
+        await supabaseRest.insert('friendships', { requester_id: userId, addressee_id: friendId, status: 'pending' });
+      } catch {
+        // Duplicate requests are ignored by local state and database unique constraints.
+      }
     }
   },
   async acceptRequest(friendshipId: string) {
@@ -24,7 +28,7 @@ export const friendService = {
   },
   async removeFriend(userId: string, friendId: string) {
     if (isSupabaseConfigured) {
-      await supabaseRest.remove('friendships', { requester_id: `eq.${userId}`, addressee_id: `eq.${friendId}` });
+      await supabaseRest.remove('friendships', { or: `(and(requester_id.eq.${userId},addressee_id.eq.${friendId}),and(requester_id.eq.${friendId},addressee_id.eq.${userId}))` });
     }
   },
 };

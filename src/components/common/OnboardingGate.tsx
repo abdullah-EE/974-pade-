@@ -4,6 +4,7 @@ import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 
 import { MotiView } from 'moti';
 import { PremiumButton } from '@/components/common/PremiumButton';
 import { PlayerAvatar } from '@/components/common/PlayerAvatar';
+import { isSupabaseConfigured } from '@/lib/supabase';
 import { useAppState } from '@/state/AppState';
 import { colors, radius, spacing } from '@/theme/tokens';
 import { Area, Level } from '@/types/models';
@@ -18,6 +19,7 @@ export function OnboardingGate() {
   const [name, setName] = useState('Abdullah Haydar');
   const [username, setUsername] = useState('@abdullah.haydar');
   const [email, setEmail] = useState('abdullah@974padel.qa');
+  const [password, setPassword] = useState('');
   const [level, setLevel] = useState<Level>('Intermediate');
   const [favoriteArea, setFavoriteArea] = useState<Area>('Lusail');
   const [accountRole, setAccountRole] = useState<'player' | 'coach' | 'both'>('player');
@@ -31,11 +33,15 @@ export function OnboardingGate() {
       setMessage('Use a real name and a username with 3-24 letters, numbers, dots, or underscores.');
       return;
     }
-    createAccount({ name: sanitizeText(name, 80), username: sanitizeText(username, 32), email: sanitizeText(email, 120), level, favoriteArea, avatarUri, accountRole });
+    if (isSupabaseConfigured && password.length < 8) {
+      setMessage('Use at least 8 characters for Supabase login.');
+      return;
+    }
+    createAccount({ name: sanitizeText(name, 80), username: sanitizeText(username, 32), email: sanitizeText(email, 120), level, favoriteArea, avatarUri, accountRole }, password || undefined);
   };
 
   const login = async () => {
-    const ok = await loginAccount(username || email);
+    const ok = await loginAccount(email || username, password || undefined);
     setMessage(ok ? 'Signed in.' : 'No local account found. Create one first.');
   };
 
@@ -57,8 +63,8 @@ export function OnboardingGate() {
       <View style={styles.backdrop}>
         <MotiView from={{ opacity: 0, translateY: 28, scale: 0.98 }} animate={{ opacity: 1, translateY: 0, scale: 1 }} transition={{ type: 'timing', duration: 360 }} style={styles.sheet}>
           <Text style={styles.kicker}>974 Padel Qatar</Text>
-          <Text style={styles.title}>{authMode === 'signup' ? 'Create your 974 account' : 'Log in locally'}</Text>
-          <Text style={styles.subtitle}>{authMode === 'signup' ? 'Choose how you want to use 974 Padel: player, coach, or both.' : 'Use the username or email you created on this device.'}</Text>
+          <Text style={styles.title}>{authMode === 'signup' ? 'Create your 974 account' : 'Log in'}</Text>
+          <Text style={styles.subtitle}>{authMode === 'signup' ? 'Choose how you want to use 974 Padel: player, coach, or both.' : 'Use your email and password when Supabase is configured, or your local username in demo mode.'}</Text>
 
           <View style={styles.row}>
             {(['signup', 'login'] as const).map((item) => (
@@ -79,7 +85,8 @@ export function OnboardingGate() {
 
           {authMode === 'signup' ? <TextInput value={name} onChangeText={setName} placeholder="Full name" style={styles.input} placeholderTextColor={colors.textSecondary} /> : null}
           <TextInput value={username} onChangeText={setUsername} placeholder="@username" autoCapitalize="none" style={styles.input} placeholderTextColor={colors.textSecondary} />
-          {authMode === 'signup' ? <TextInput value={email} onChangeText={setEmail} placeholder="Email" autoCapitalize="none" style={styles.input} placeholderTextColor={colors.textSecondary} /> : null}
+          <TextInput value={email} onChangeText={setEmail} placeholder="Email" autoCapitalize="none" keyboardType="email-address" style={styles.input} placeholderTextColor={colors.textSecondary} />
+          <TextInput value={password} onChangeText={setPassword} placeholder="Password for real login" secureTextEntry style={styles.input} placeholderTextColor={colors.textSecondary} />
 
           {authMode === 'signup' ? (
           <>

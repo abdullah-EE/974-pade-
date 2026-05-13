@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { router } from 'expo-router';
 import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { CollapsibleSection } from '@/components/common/CollapsibleSection';
@@ -11,6 +11,8 @@ import { StaggeredList } from '@/components/common/StaggeredList';
 import { HorizontalCardRail } from '@/components/common/HorizontalCardRail';
 import { useAppState } from '@/state/AppState';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
+import { playerService } from '@/services/playerService';
+import { Player } from '@/types/models';
 import { colors, radius, spacing } from '@/theme/tokens';
 import { centeredContent } from '@/theme/layout';
 
@@ -21,15 +23,27 @@ export default function RankingsScreen() {
   const [query, setQuery] = useState('');
   const debouncedQuery = useDebouncedValue(query);
   const { players, currentUser, friendIds, addFriend, removeFriend } = useAppState();
+  const [remotePlayers, setRemotePlayers] = useState<Player[] | null>(null);
+  useEffect(() => {
+    let active = true;
+    playerService.searchPlayers(players, debouncedQuery).then((items) => {
+      if (active) setRemotePlayers(items);
+    }).catch(() => {
+      if (active) setRemotePlayers(null);
+    });
+    return () => {
+      active = false;
+    };
+  }, [debouncedQuery, players]);
   const ranked = useMemo(() => {
-    const list = [...players];
+    const list = [...(remotePlayers || players)];
     const filtered = list.filter((player) => `${player.name} ${player.username} ${player.club}`.toLowerCase().includes(debouncedQuery.trim().toLowerCase()));
     if (filter === 'This Week') return filtered.sort((a, b) => b.movement - a.movement);
     if (filter === 'Friends') return filtered.filter((player) => friendIds.includes(player.id) || player.id === currentUser.id);
     if (filter === 'Club') return filtered.filter((player) => player.club === currentUser.club);
     if (filter === 'Beginner' || filter === 'Intermediate' || filter === 'Advanced') return filtered.filter((player) => player.level === filter);
     return filtered.sort((a, b) => a.rank - b.rank);
-  }, [currentUser.club, currentUser.id, debouncedQuery, filter, friendIds, players]);
+  }, [currentUser.club, currentUser.id, debouncedQuery, filter, friendIds, players, remotePlayers]);
 
   return (
     <ScreenTransitionWrapper>

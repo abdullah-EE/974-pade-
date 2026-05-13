@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
+import * as Location from 'expo-location';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { ActionSheet } from '@/components/common/ActionSheet';
 import { ImageWithFallback } from '@/components/common/ImageWithFallback';
@@ -29,6 +30,8 @@ export default function SubmitScreen() {
   const [score, setScore] = useState('6-4, 6-3');
   const [proofUri, setProofUri] = useState<string | undefined>();
   const [proofMessage, setProofMessage] = useState('Attach a scoreboard, court, or post-match proof photo.');
+  const [gpsVerification, setGpsVerification] = useState<Match['gpsVerification']>();
+  const [gpsMessage, setGpsMessage] = useState('Tap GPS check at the court. Backend venue distance rules connect next.');
   const [done, setDone] = useState(false);
   const selectedCourt = courts.find((court) => court.id === selectedCourtId) || courts[0];
   const pendingMatches = useMemo(() => matches.filter((match) => match.status === 'Pending').slice(0, 3), [matches]);
@@ -57,6 +60,7 @@ export default function SubmitScreen() {
       ratingChange: 0,
       status: 'Pending',
       proofUri,
+      gpsVerification,
     };
     addMatch(newMatch);
     setDone(true);
@@ -92,6 +96,21 @@ export default function SubmitScreen() {
       setProofMessage('Camera proof attached locally.');
     }
   };
+  const runGpsCheck = async () => {
+    const permission = await Location.requestForegroundPermissionsAsync();
+    if (permission.status !== 'granted') {
+      setGpsMessage('Location permission was denied. Proof photo and opponent confirmation still work.');
+      return;
+    }
+    const position = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+    setGpsVerification({
+      latitude: position.coords.latitude,
+      longitude: position.coords.longitude,
+      accuracy: position.coords.accuracy,
+      capturedAt: new Date().toISOString(),
+    });
+    setGpsMessage(`GPS captured near ${selectedCourt.area}. Backend venue-distance verification comes next.`);
+  };
   const cancelFlow = () => {
     setStep(0);
     setSelectedCourtId(courtId || courts[0].id);
@@ -102,6 +121,8 @@ export default function SubmitScreen() {
     setScore('6-4, 6-3');
     setProofUri(undefined);
     setProofMessage('Attach a scoreboard, court, or post-match proof photo.');
+    setGpsVerification(undefined);
+    setGpsMessage('Tap GPS check at the court. Backend venue distance rules connect next.');
   };
 
   return (
@@ -198,7 +219,9 @@ export default function SubmitScreen() {
           </View>
           <View style={styles.panel}>
             <Text style={styles.cardTitle}>GPS verification</Text>
-            <Text style={styles.meta}>GPS check preview: near {selectedCourt.name}, {selectedCourt.area}.</Text>
+            <Text style={styles.meta}>{gpsMessage}</Text>
+            {gpsVerification ? <Text style={styles.meta}>Captured: {gpsVerification.latitude.toFixed(4)}, {gpsVerification.longitude.toFixed(4)} · accuracy {Math.round(gpsVerification.accuracy || 0)}m</Text> : null}
+            <PremiumButton label={gpsVerification ? 'Refresh GPS check' : 'Run GPS check'} icon="map-marker-check-outline" variant="secondary" onPress={runGpsCheck} />
           </View>
           <View style={styles.panel}>
             <Text style={styles.cardTitle}>Review</Text>

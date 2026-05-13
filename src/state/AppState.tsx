@@ -4,6 +4,9 @@ import { mockVideos } from '@/data/mockVideos';
 import { mockCosmetics, mockWallet } from '@/data/mockWallet';
 import { challenges as initialChallenges, courts as initialCourts, matches as initialMatches, openGames as initialOpenGames, players as initialPlayers } from '@/data/mockData';
 import { accountService } from '@/services/accountService';
+import { challengeService } from '@/services/challengeService';
+import { friendService } from '@/services/friendService';
+import { matchService } from '@/services/matchService';
 import { rankingService } from '@/services/rankingService';
 import { Coach } from '@/types/Coach';
 import { VideoPost } from '@/types/VideoPost';
@@ -37,8 +40,9 @@ interface AppStateValue {
   cosmetics: CosmeticItem[];
   activeCosmeticIds: string[];
   friendIds: string[];
-  createAccount: (account: LocalAccount) => void;
-  loginAccount: (usernameOrEmail: string) => Promise<boolean>;
+  createAccount: (account: LocalAccount, password?: string) => void;
+  loginAccount: (usernameOrEmail: string, password?: string) => Promise<boolean>;
+  logoutAccount: () => void;
   updateAccount: (patch: Partial<LocalAccount>) => void;
   addFriend: (id: string) => void;
   removeFriend: (id: string) => void;
@@ -129,7 +133,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 
   const currentUser = players[0];
 
-  const createAccount = (nextAccount: LocalAccount) => {
+  const createAccount = (nextAccount: LocalAccount, password?: string) => {
     const enriched = {
       ...nextAccount,
       id: nextAccount.id || 'p1',
@@ -142,10 +146,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       accountRole: nextAccount.accountRole || 'player',
     };
     setAccount(enriched);
-    accountService.saveAccount(enriched).catch(() => undefined);
+    accountService.saveAccount(enriched, password).then((remote) => setAccount(remote)).catch(() => undefined);
   };
-  const loginAccount = async (usernameOrEmail: string) => {
-    const stored = await accountService.login(usernameOrEmail);
+  const loginAccount = async (usernameOrEmail: string, password?: string) => {
+    const stored = await accountService.login(usernameOrEmail, password);
     if (!stored) return false;
     setAccount(stored);
     return true;
@@ -155,6 +159,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     const next = { ...account, ...patch };
     setAccount(next);
     accountService.saveAccount(next).catch(() => undefined);
+  };
+  const logoutAccount = () => {
+    setAccount(null);
+    accountService.logout().catch(() => undefined);
   };
 
   const joinOpenGame = (id: string) => {
@@ -171,12 +179,14 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     setFriendIds((items) => {
       if (!canRunAction(`friend-${id}`, 900)) return items;
       const next = items.includes(id) ? items : [...items, id];
+      friendService.sendRequest(currentUser.id, id).catch(() => undefined);
       accountService.saveFriendIds(next).catch(() => undefined);
       return next;
     });
   const removeFriend = (id: string) =>
     setFriendIds((items) => {
       const next = items.filter((item) => item !== id);
+      friendService.removeFriend(currentUser.id, id).catch(() => undefined);
       accountService.saveFriendIds(next).catch(() => undefined);
       return next;
     });
@@ -198,6 +208,18 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       privacy: input.privacy,
     };
     setChallenges((items) => [challenge, ...items]);
+    challengeService.createChallenge({
+      creatorId: currentUser.id,
+      opponentIds: input.opponentIds || (input.opponentId ? [input.opponentId] : []),
+      courtId: input.courtId,
+      startsAt: input.startsAt,
+      level: input.level,
+      privacy: input.privacy || 'Public',
+      type: input.type,
+      note: input.note,
+    }).then((remote) => {
+      if (remote.id !== challenge.id) setChallenges((items) => items.map((item) => (item.id === challenge.id ? { ...item, id: remote.id } : item)));
+    }).catch(() => undefined);
     if (challenge.privacy === 'Public' && challenge.to === 'open') {
       setOpenGames((items) => [
         {
@@ -218,15 +240,23 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 
   const updateChallenge = (id: string, status: ChallengeStatus) => {
     setChallenges((items) => items.map((item) => (item.id === id ? { ...item, status } : item)));
+    challengeService.updateChallenge(id, status).catch(() => undefined);
   };
 
   const addMatch = (match: Match) => {
     if (!canRunAction(`match-${currentUser.id}-${match.courtId}`, 1800)) return;
     setMatches((items) => [match, ...items]);
+    matchService.submitMatch(match).then((remote) => {
+      if (remote.id !== match.id) setMatches((items) => items.map((item) => (item.id === match.id ? remote : item)));
+    }).catch(() => undefined);
   };
   const updateMatchStatus = (id: string, status: MatchStatus) => {
     const target = matches.find((match) => match.id === id);
     setMatches((items) => items.map((item) => (item.id === id ? { ...item, status } : item)));
+    if (target) {
+      const remoteAction = status === 'Verified' ? matchService.confirmMatch(target, currentUser.id, players) : status === 'Disputed' ? matchService.disputeMatch(target, currentUser.id) : Promise.resolve(target);
+      remoteAction.catch(() => undefined);
+    }
     if (status === 'Verified' && target && [...target.teamA, ...target.teamB].includes(currentUser.id) && canRunAction(`verified-credit-${id}`, 60 * 60 * 1000)) {
       const delta = rankingService.previewDelta(players, target);
       const nextPlayer = rankingService.applyConfirmedMatch(currentUser, { ...target, status: 'Verified' }, delta);
@@ -310,7 +340,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     return video;
   };
 
-  const value = { account, currentUser, players, courts, openGames, challenges, matches, coaches, videos, wallet, cosmetics, activeCosmeticIds, friendIds, createAccount, loginAccount, updateAccount, addFriend, removeFriend, joinOpenGame, createChallenge, updateChallenge, addMatch, updateMatchStatus, requestCoachSession, toggleVideoLike, toggleVideoSave, previewCosmetic, selectCosmetic, buyCosmetic, earnCredits, createCoachProfile, uploadVideo };
+  const value = { account, currentUser, players, courts, openGames, challenges, matches, coaches, videos, wallet, cosmetics, activeCosmeticIds, friendIds, createAccount, loginAccount, logoutAccount, updateAccount, addFriend, removeFriend, joinOpenGame, createChallenge, updateChallenge, addMatch, updateMatchStatus, requestCoachSession, toggleVideoLike, toggleVideoSave, previewCosmetic, selectCosmetic, buyCosmetic, earnCredits, createCoachProfile, uploadVideo };
 
   return <AppStateContext.Provider value={value}>{hydrated ? children : null}</AppStateContext.Provider>;
 }

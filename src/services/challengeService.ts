@@ -9,7 +9,25 @@ export interface CreateChallengePayload {
   startsAt: string;
   level: Level;
   privacy: NonNullable<Challenge['privacy']>;
+  type?: Challenge['type'];
   note?: string;
+}
+
+function privacyToDb(privacy: NonNullable<Challenge['privacy']>) {
+  if (privacy === 'Friends only') return 'friends_only';
+  if (privacy === 'Private invite') return 'private_invite';
+  return 'public';
+}
+
+function typeToDb(type?: Challenge['type']) {
+  if (type === 'open game') return 'open_game';
+  return type || 'doubles';
+}
+
+function statusToDb(status: Challenge['status']) {
+  const value = String(status).toLowerCase();
+  if (value === 'incoming') return 'sent';
+  return value;
 }
 
 export const challengeService = {
@@ -21,10 +39,12 @@ export const challengeService = {
           court_id: input.courtId,
           starts_at: input.startsAt,
           level: input.level,
-          privacy: input.privacy,
+          privacy: privacyToDb(input.privacy),
+          type: typeToDb(input.type),
           note: sanitizeText(input.note || '', 180),
           status: input.privacy === 'Public' && input.opponentIds.length === 0 ? 'open' : 'sent',
         });
+        await Promise.all(input.opponentIds.map((id) => supabaseRest.insert('challenge_invites', { challenge_id: created.id, invited_profile_id: id, status: 'sent' })));
         return {
           ...created,
           id: created.id,
@@ -51,5 +71,14 @@ export const challengeService = {
       isPrivate: input.privacy === 'Private invite',
       privacy: input.privacy,
     };
+  },
+  async updateChallenge(id: string, status: Challenge['status']) {
+    if (isSupabaseConfigured) {
+      try {
+        await supabaseRest.update('challenges', { status: statusToDb(status) }, { id: `eq.${id}` });
+      } catch {
+        // Local state remains live if RLS or migrations are not ready.
+      }
+    }
   },
 };

@@ -26,7 +26,7 @@ import { formatPlayerStatus, winRate } from '@/utils/format';
 import { sanitizeText, validateImageAsset } from '@/utils/validation';
 
 export default function ProfileScreen() {
-  const { currentUser: me, players, courts, matches, challenges, friendIds, coaches, videos, wallet, cosmetics, activeCosmeticIds, updateAccount, updateMatchStatus, updateChallenge, requestCoachSession, previewCosmetic, selectCosmetic, buyCosmetic, toggleVideoLike, toggleVideoSave, createCoachProfile, uploadVideo } = useAppState();
+  const { currentUser: me, players, courts, matches, challenges, friendIds, coaches, videos, wallet, cosmetics, activeCosmeticIds, updateAccount, logoutAccount, updateMatchStatus, updateChallenge, requestCoachSession, previewCosmetic, selectCosmetic, buyCosmetic, toggleVideoLike, toggleVideoSave, createCoachProfile, uploadVideo } = useAppState();
   const [sheet, setSheet] = useState<'edit' | 'settings' | 'premium' | 'coachSignup' | 'videoUpload' | 'clubPro' | 'partnerPerks' | null>(null);
   const [coachSheet, setCoachSheet] = useState<Coach | null>(null);
   const [videoSheet, setVideoSheet] = useState<VideoPost | null>(null);
@@ -391,6 +391,7 @@ export default function ProfileScreen() {
         <PremiumButton label="Save local changes" icon="content-save-outline" onPress={() => setSheet(null)} />
       </ActionSheet>
       <ActionSheet visible={sheet === 'settings'} title="Settings" subtitle="Notification, privacy, and verification preferences will connect later." onClose={() => setSheet(null)}>
+        <PremiumButton label="Log out" icon="logout" variant="secondary" onPress={() => { setSheet(null); logoutAccount(); }} />
         <PremiumButton label="Done" icon="check" onPress={() => setSheet(null)} />
       </ActionSheet>
       <ActionSheet visible={sheet === 'premium'} title="Premium preview" subtitle="Payments and subscriptions are intentionally inactive in this frontend MVP." onClose={() => setSheet(null)}>

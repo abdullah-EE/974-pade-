@@ -95,6 +95,12 @@ export interface Match {
   status: MatchStatus;
   proofUri?: string;
   proofImageUri?: string;
+  gpsVerification?: {
+    latitude: number;
+    longitude: number;
+    capturedAt: string;
+    accuracy?: number | null;
+  };
   verificationStatus?: 'pendingOpponent' | 'confirmed' | 'disputed';
   verificationRequirements?: VerificationRequirement[];
 }
