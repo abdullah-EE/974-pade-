@@ -4,7 +4,6 @@ import { useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { ActionSheet } from '@/components/common/ActionSheet';
-import { CollapsibleSection } from '@/components/common/CollapsibleSection';
 import { ImageWithFallback } from '@/components/common/ImageWithFallback';
 import { MatchCard } from '@/components/common/MatchCard';
 import { PlayerAvatar } from '@/components/common/PlayerAvatar';
@@ -77,6 +76,17 @@ export default function SubmitScreen() {
       setProofMessage('Camera proof attached locally.');
     }
   };
+  const cancelFlow = () => {
+    setStep(0);
+    setSelectedCourtId(courtId || courts[0].id);
+    setTeamA([currentUser.id]);
+    setTeamB(['p2']);
+    setPlayerQuery('');
+    setFriendsOnly(false);
+    setScore('6-4, 6-3');
+    setProofUri(undefined);
+    setProofMessage('Attach a scoreboard, court, or post-match proof photo.');
+  };
 
   return (
     <ScreenTransitionWrapper>
@@ -87,16 +97,19 @@ export default function SubmitScreen() {
       </View>
       <View style={styles.progress}>
         {steps.map((label, index) => (
-          <Pressable key={label} onPress={() => setStep(index)} style={({ pressed }) => [styles.step, index <= step && styles.stepActive, pressed && styles.pressed]}>
+          <View key={label} style={[styles.step, index <= step && styles.stepActive]}>
             <Text style={[styles.stepText, index <= step && styles.stepTextActive]}>{index + 1}</Text>
-          </Pressable>
+          </View>
         ))}
       </View>
-      <Text style={styles.stepLabel}>{steps[step]}</Text>
+      <View style={styles.stepHeader}>
+        <Text style={styles.stepLabel}>{steps[step]}</Text>
+        <PremiumButton label="Cancel" variant="subtle" icon="close" onPress={cancelFlow} />
+      </View>
 
-      <CollapsibleSection title="Match Setup" action={steps[step]} defaultOpen>
       {step === 0 ? (
-        <View style={styles.stack}>
+        <View style={styles.wizardPanel}>
+          <Text style={styles.cardTitle}>Choose court</Text>
           {courts.map((court) => (
             <Pressable key={court.id} onPress={() => setSelectedCourtId(court.id)} style={({ pressed }) => [styles.court, selectedCourtId === court.id && styles.selected, pressed && styles.pressed]}>
               <ImageWithFallback uri={court.image} style={styles.courtImage} label={court.name} />
@@ -110,11 +123,10 @@ export default function SubmitScreen() {
           <PremiumButton label="Continue to players" icon="arrow-right" onPress={() => setStep(1)} />
         </View>
       ) : null}
-      </CollapsibleSection>
 
-      <CollapsibleSection title="Players & Teams" action={`${teamA.length + teamB.length} selected`} defaultOpen={step === 1}>
       {step === 1 ? (
-        <View style={styles.stack}>
+        <View style={styles.wizardPanel}>
+          <Text style={styles.cardTitle}>Build teams</Text>
           <Text style={styles.help}>Tap players to fill Team A first, then Team B.</Text>
           <TextInput value={playerQuery} onChangeText={setPlayerQuery} placeholder="Search players or friends" placeholderTextColor={colors.textSecondary} style={styles.input} />
           <Pressable onPress={() => setFriendsOnly((value) => !value)} style={({ pressed }) => [styles.friendToggle, friendsOnly && styles.selected, pressed && styles.pressed]}>
@@ -138,22 +150,24 @@ export default function SubmitScreen() {
               </Pressable>
             );
           })}
-          <PremiumButton label="Continue to score" icon="arrow-right" onPress={() => setStep(2)} />
+          <View style={styles.actions}>
+            <PremiumButton label="Back" variant="subtle" icon="arrow-left" onPress={() => setStep(0)} style={{ flex: 1 }} />
+            <PremiumButton label="Continue to score" icon="arrow-right" onPress={() => setStep(2)} style={{ flex: 1 }} />
+          </View>
         </View>
       ) : null}
-      </CollapsibleSection>
 
-      <CollapsibleSection title="Score" action={score} defaultOpen={step === 2}>
       {step === 2 ? (
-        <View style={styles.panel}>
+        <View style={styles.wizardPanel}>
           <Text style={styles.cardTitle}>Final score</Text>
           <TextInput value={score} onChangeText={setScore} placeholder="6-4, 6-3" style={styles.input} />
-          <PremiumButton label="Continue to proof" icon="camera-outline" onPress={() => setStep(3)} />
+          <View style={styles.actions}>
+            <PremiumButton label="Back" variant="subtle" icon="arrow-left" onPress={() => setStep(1)} style={{ flex: 1 }} />
+            <PremiumButton label="Continue to proof" icon="camera-outline" onPress={() => setStep(3)} style={{ flex: 1 }} />
+          </View>
         </View>
       ) : null}
-      </CollapsibleSection>
 
-      <CollapsibleSection title="Proof & Verification" action={proofUri ? 'Photo attached' : 'Needs proof'} defaultOpen={step === 3}>
       {step === 3 ? (
         <View style={styles.stack}>
           <View style={styles.panel}>
@@ -177,18 +191,22 @@ export default function SubmitScreen() {
             <Text style={styles.meta}>Team A: {teamA.map((id) => players.find((player) => player.id === id)?.name).join(', ')}</Text>
             <Text style={styles.meta}>Team B: {teamB.map((id) => players.find((player) => player.id === id)?.name).join(', ')}</Text>
           </View>
-          <PremiumButton label="Submit match" icon="check-decagram-outline" onPress={submitMatch} />
+          <View style={styles.actions}>
+            <PremiumButton label="Back" variant="subtle" icon="arrow-left" onPress={() => setStep(2)} style={{ flex: 1 }} />
+            <PremiumButton label="Submit match" icon="check-decagram-outline" onPress={submitMatch} style={{ flex: 1 }} />
+          </View>
         </View>
       ) : null}
-      </CollapsibleSection>
-
-      <CollapsibleSection title="Pending Results" action={`${pendingMatches.length} pending`}>
+      {pendingMatches.length ? (
+      <View style={styles.wizardPanel}>
+        <Text style={styles.cardTitle}>Pending Results</Text>
         <View style={styles.stack}>
           {pendingMatches.map((match) => (
             <MatchCard key={match.id} match={match} court={courts.find((court) => court.id === match.courtId) || courts[0]} players={players} onConfirm={() => updateMatchStatus(match.id, 'Verified')} onDispute={() => updateMatchStatus(match.id, 'Disputed')} />
           ))}
         </View>
-      </CollapsibleSection>
+      </View>
+      ) : null}
 
       <ActionSheet visible={done} title="Match pending confirmation" subtitle="Both sides can confirm or dispute before rating is finalized." onClose={() => setDone(false)}>
         <PremiumButton label="View pending matches" icon="clipboard-list-outline" onPress={() => setDone(false)} />
@@ -210,7 +228,9 @@ const styles = StyleSheet.create({
   stepText: { opacity: 0, fontSize: 1 },
   stepTextActive: { opacity: 0 },
   stepLabel: { color: colors.textPrimary, fontWeight: '900', fontSize: 20 },
+  stepHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
   stack: { gap: 10 },
+  wizardPanel: { backgroundColor: colors.card, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, padding: 14, gap: 10 },
   court: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: colors.card, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, padding: 10 },
   selected: { borderColor: colors.hotPink, backgroundColor: colors.softMaroon },
   courtImage: { width: 78, height: 62, borderRadius: radius.md },

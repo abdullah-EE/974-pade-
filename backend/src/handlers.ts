@@ -8,11 +8,27 @@ export async function createProfile(input: Omit<BackendProfile, 'id' | 'rating' 
     rating: 1800,
     weeklyPoints: 0,
     verifiedMatches: 0,
+    accountRole: input.accountRole || 'player',
     createdAt: new Date().toISOString(),
   };
   store.profiles.set(profile.id, profile);
   store.wallets.set(profile.id, 120);
   return profile;
+}
+
+export async function loginProfile(usernameOrEmail: string) {
+  const clean = usernameOrEmail.trim().toLowerCase();
+  const profile = Array.from(store.profiles.values()).find((item) => item.username.toLowerCase() === clean || item.email?.toLowerCase() === clean);
+  if (!profile) throw new Error('Profile not found');
+  return profile;
+}
+
+export async function chooseAccountRole(userId: string, accountRole: BackendProfile['accountRole']) {
+  const profile = store.profiles.get(userId);
+  if (!profile) throw new Error('Profile not found');
+  const next = { ...profile, accountRole };
+  store.profiles.set(userId, next);
+  return next;
 }
 
 export async function addFriend(userId: string, friendId: string) {

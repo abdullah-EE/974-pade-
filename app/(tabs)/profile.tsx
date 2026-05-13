@@ -42,6 +42,12 @@ export default function ProfileScreen() {
   const progress = Math.min(100, Math.round(((me.rating - 1800) / 500) * 100));
   const favoriteCourt = courts.find((court) => court.id === me.favoriteCourtId) || courts[0];
   const localCoach = coaches.find((coach) => coach.id.startsWith('coach-local'));
+  const equippedCosmetics = cosmetics.filter((item) => item.equipped || activeCosmeticIds.includes(item.id));
+  const hasPearlBorder = equippedCosmetics.some((item) => item.id === 'pearl-border');
+  const hasEliteBadge = equippedCosmetics.some((item) => item.id === 'elite-badge');
+  const hasLusailBg = equippedCosmetics.some((item) => item.id === 'lusail-bg');
+  const hasVictoryFlash = equippedCosmetics.some((item) => item.id === 'victory-flash');
+  const hasMaroonCard = equippedCosmetics.some((item) => item.id === 'maroon-card');
 
   const submitCoachSignup = () => {
     createCoachProfile({
@@ -83,7 +89,7 @@ export default function ProfileScreen() {
   return (
     <ScreenTransitionWrapper>
     <ScrollView style={styles.screen} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-      <View style={styles.header}>
+      <View style={[styles.header, hasLusailBg && styles.headerLusail, hasEliteBadge && styles.headerElite]}>
         <View style={{ flex: 1 }}>
           <Text style={styles.kicker}>My 974 profile</Text>
           <Text style={styles.name}>{me.name}</Text>
@@ -92,16 +98,18 @@ export default function ProfileScreen() {
             <AnimatedNumber value={me.rating} style={styles.subNumber} />
           </View>
         </View>
-        <PlayerAvatar name={me.name} uri={me.avatar} size={78} />
+        <View style={[styles.avatarShell, hasPearlBorder && styles.avatarPearl, hasEliteBadge && styles.avatarElite]}>
+          <PlayerAvatar name={me.name} uri={me.avatar} size={78} />
+        </View>
       </View>
 
       <View style={styles.stats}>
-        <View style={styles.stat}><Text style={styles.statValue}>{me.wins}-{me.losses}</Text><Text style={styles.statLabel}>Record</Text></View>
-        <View style={styles.stat}><AnimatedNumber value={winRate(me.wins, me.losses)} suffix="%" style={styles.statValue} /><Text style={styles.statLabel}>Win rate</Text></View>
-        <View style={styles.stat}><AnimatedNumber value={me.streak} style={styles.statValue} /><Text style={styles.statLabel}>Streak</Text></View>
+        <View style={[styles.stat, hasMaroonCard && styles.cosmeticSurface]}><Text style={styles.statValue}>{me.wins}-{me.losses}</Text><Text style={styles.statLabel}>Record</Text></View>
+        <View style={[styles.stat, hasMaroonCard && styles.cosmeticSurface]}><AnimatedNumber value={winRate(me.wins, me.losses)} suffix="%" style={styles.statValue} /><Text style={styles.statLabel}>Win rate</Text></View>
+        <View style={[styles.stat, hasMaroonCard && styles.cosmeticSurface]}><AnimatedNumber value={me.streak} style={styles.statValue} /><Text style={styles.statLabel}>Streak</Text></View>
       </View>
 
-      <View style={styles.panel}>
+      <View style={[styles.panel, hasMaroonCard && styles.cosmeticSurface, hasVictoryFlash && styles.victoryGlow]}>
         <View style={styles.progressHead}>
           <Text style={styles.panelTitle}>Rating progress</Text>
           <Text style={styles.panelMeta}>{progress}% to next tier</Text>
@@ -112,6 +120,11 @@ export default function ProfileScreen() {
           <Text style={styles.cosmetic}>{me.tokens || me.weeklyPoints || 0} credits</Text>
         </View>
         <Text style={styles.panelMeta}>Cosmetics, themes, premium stats, and no-ads benefits plug in here later.</Text>
+      </View>
+
+      <View style={styles.equippedBar}>
+        <Text style={styles.panelTitle}>Equipped look</Text>
+        <Text style={styles.panelMeta}>{equippedCosmetics.map((item) => item.name).slice(0, 4).join(' - ') || 'Classic Frame'}</Text>
       </View>
 
       <CollapsibleSection title="Player Status" action="Ranking and form" defaultOpen>
@@ -326,6 +339,11 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
   content: { ...centeredContent, paddingBottom: 104, gap: 20 },
   header: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.primary, paddingTop: 58, paddingBottom: 24, paddingHorizontal: spacing.md },
+  headerLusail: { backgroundColor: '#3A001D', borderBottomWidth: 1, borderBottomColor: colors.hotPink },
+  headerElite: { shadowColor: colors.hotPink, shadowOpacity: 0.42, shadowRadius: 22, shadowOffset: { width: 0, height: 14 }, elevation: 10 },
+  avatarShell: { padding: 3, borderRadius: 999, borderWidth: 1, borderColor: 'rgba(255,255,255,0.16)' },
+  avatarPearl: { borderWidth: 3, borderColor: colors.pearl, shadowColor: colors.pearl, shadowOpacity: 0.26, shadowRadius: 12 },
+  avatarElite: { borderColor: colors.hotPink, shadowColor: colors.hotPink, shadowOpacity: 0.55, shadowRadius: 16 },
   kicker: { color: '#F2DCE7', fontWeight: '900', textTransform: 'uppercase', fontSize: 12 },
   name: { color: '#FFFFFF', fontWeight: '900', fontSize: 30, marginTop: 5 },
   headerStats: { flexDirection: 'row', gap: 8, marginTop: 7, flexWrap: 'wrap' },
@@ -335,6 +353,9 @@ const styles = StyleSheet.create({
   statValue: { color: colors.textPrimary, fontWeight: '900', fontSize: 20 },
   statLabel: { color: colors.textSecondary, fontWeight: '800', marginTop: 4, fontSize: 12 },
   panel: { marginHorizontal: spacing.md, backgroundColor: colors.card, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, padding: 14, gap: 10 },
+  cosmeticSurface: { borderColor: colors.hotPink, backgroundColor: '#321020' },
+  victoryGlow: { shadowColor: colors.hotPink, shadowOpacity: 0.35, shadowRadius: 18, shadowOffset: { width: 0, height: 12 }, elevation: 8 },
+  equippedBar: { marginHorizontal: spacing.md, backgroundColor: colors.glass, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, padding: 14, gap: 6 },
   progressHead: { flexDirection: 'row', justifyContent: 'space-between', gap: 10 },
   panelTitle: { color: colors.textPrimary, fontWeight: '900' },
   panelMeta: { color: colors.textSecondary, fontWeight: '700' },

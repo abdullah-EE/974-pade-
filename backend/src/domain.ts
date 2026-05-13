@@ -15,6 +15,8 @@ export interface BackendProfile {
   weeklyPoints: number;
   verifiedMatches: number;
   subscriptionTier: 'free' | 'premium';
+  accountRole: 'player' | 'coach' | 'both';
+  email?: string;
   createdAt: string;
 }
 

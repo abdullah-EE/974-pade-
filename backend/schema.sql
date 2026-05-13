@@ -10,6 +10,9 @@ create table profiles (
   weekly_points integer not null default 0,
   verified_matches integer not null default 0,
   subscription_tier text not null default 'free',
+  account_role text not null default 'player' check (account_role in ('player', 'coach', 'both')),
+  email text unique,
+  password_hash text,
   created_at timestamptz not null default now()
 );
 

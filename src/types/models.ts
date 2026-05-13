@@ -146,5 +146,7 @@ export interface LocalAccount {
   credits?: number;
   cosmeticsOwned?: string[];
   activeTheme?: string;
+  accountRole?: 'player' | 'coach' | 'both';
+  email?: string;
   createdAt?: string;
 }
