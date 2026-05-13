@@ -15,6 +15,8 @@ export interface CosmeticItem {
   unlocked?: boolean;
   equipped?: boolean;
   description?: string;
+  rarity?: 'Common' | 'Rare' | 'Epic' | 'Legendary' | 'Founder' | 'Premium';
+  accentColor?: string;
 }
 
 export interface UserCosmetic {

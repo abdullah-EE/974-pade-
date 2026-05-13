@@ -93,7 +93,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [videos, setVideos] = useState<VideoPost[]>(mockVideos);
   const [wallet, setWallet] = useState<Wallet>(mockWallet);
   const [cosmetics, setCosmetics] = useState<CosmeticItem[]>(mockCosmetics);
-  const [activeCosmeticIds, setActiveCosmeticIds] = useState<string[]>(['classic-frame', 'maroon-card']);
+  const [activeCosmeticIds, setActiveCosmeticIds] = useState<string[]>(['classic-maroon', 'maroon-card']);
   const [friendIds, setFriendIds] = useState<string[]>(['p2', 'p5', 'p11']);
   const [hydrated, setHydrated] = useState(false);
 
@@ -137,7 +137,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       subscriptionTier: nextAccount.subscriptionTier || 'free',
       walletBalance: nextAccount.walletBalance ?? 0,
       credits: nextAccount.credits ?? 120,
-      cosmeticsOwned: nextAccount.cosmeticsOwned || ['Classic profile'],
+      cosmeticsOwned: nextAccount.cosmeticsOwned || ['Classic Maroon'],
       activeTheme: nextAccount.activeTheme || 'Maroon Glass',
       accountRole: nextAccount.accountRole || 'player',
     };
@@ -248,14 +248,14 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   };
   const toggleVideoLike = (id: string) => setVideos((items) => items.map((video) => (video.id === id ? { ...video, liked: !video.liked } : video)));
   const toggleVideoSave = (id: string) => setVideos((items) => items.map((video) => (video.id === id ? { ...video, saved: !video.saved } : video)));
-  const previewCosmetic = (id: string) => setActiveCosmeticIds((items) => (items.includes(id) ? items : [id, ...items.slice(0, 2)]));
+  const previewCosmetic = (_id: string) => undefined;
   const selectCosmetic = (id: string) => {
     const item = cosmetics.find((cosmetic) => cosmetic.id === id);
     if (!item || !item.unlocked) return;
     setCosmetics((items) =>
       items.map((cosmetic) => (cosmetic.type === item.type ? { ...cosmetic, equipped: cosmetic.id === id } : cosmetic)),
     );
-    setActiveCosmeticIds((items) => (items.includes(id) ? items : [id, ...items.slice(0, 3)]));
+    setActiveCosmeticIds((items) => [id, ...items.filter((activeId) => cosmetics.find((cosmetic) => cosmetic.id === activeId)?.type !== item.type && activeId !== id)]);
   };
   const buyCosmetic = (id: string) => {
     const item = cosmetics.find((cosmetic) => cosmetic.id === id);
@@ -272,7 +272,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     setCosmetics((items) =>
       items.map((cosmetic) => (cosmetic.type === item.type ? { ...cosmetic, unlocked: cosmetic.id === id ? true : cosmetic.unlocked, equipped: cosmetic.id === id } : cosmetic)),
     );
-    setActiveCosmeticIds((items) => (items.includes(id) ? items : [id, ...items.slice(0, 3)]));
+    setActiveCosmeticIds((items) => [id, ...items.filter((activeId) => cosmetics.find((cosmetic) => cosmetic.id === activeId)?.type !== item.type && activeId !== id)]);
     return true;
   };
   const earnCredits = (amount: number, reason: Wallet['transactions'][number]['reason']) => {

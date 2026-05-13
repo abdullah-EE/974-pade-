@@ -14,7 +14,7 @@ export const mockUsers: User[] = [
     subscriptionTier: 'free',
     walletBalance: 980,
     credits: 980,
-    cosmeticsOwned: ['classic-frame', 'maroon-card'],
+    cosmeticsOwned: ['classic-maroon', 'maroon-card'],
     activeTheme: 'Maroon Glass',
     createdAt: '2026-05-01T10:00:00+03:00',
   },
