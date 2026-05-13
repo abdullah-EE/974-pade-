@@ -1,4 +1,5 @@
-import { Stack } from 'expo-router';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Stack, router, useLocalSearchParams, usePathname } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as Linking from 'expo-linking';
 import { Platform, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
@@ -6,25 +7,95 @@ import { OnboardingGate } from '@/components/common/OnboardingGate';
 import { AppStateProvider } from '@/state/AppState';
 import { colors, radius, spacing } from '@/theme/tokens';
 
+const DEMO_KEY = '974early';
+const DEMO_STORAGE_KEY = '974-padel-demo-access';
+const demoIframeStyle = {
+  width: '100%',
+  height: '100%',
+  border: 0,
+  backgroundColor: colors.deep,
+};
+
+function firstParam(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
 export default function RootLayout() {
   const { width } = useWindowDimensions();
+  const pathname = usePathname();
+  const params = useLocalSearchParams();
+  const [storedDemoAccess, setStoredDemoAccess] = useState(false);
   const showInvestorShell = Platform.OS === 'web';
   const desktop = width >= 900;
+  const key = firstParam(params.key);
+  const isDemoPage = pathname === '/demo';
+  const hasKeyAccess = key === DEMO_KEY;
+  const isDemoAppRoute = showInvestorShell && !isDemoPage && pathname !== '/' && (hasKeyAccess || storedDemoAccess);
+  const demoFrameSrc = useMemo(() => `/courts?demo=1&key=${DEMO_KEY}`, []);
   const appStack = (
     <>
       <StatusBar style="light" />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="demo" />
       </Stack>
       <OnboardingGate />
     </>
   );
 
+  useEffect(() => {
+    if (Platform.OS !== 'web') return;
+
+    try {
+      if (hasKeyAccess) {
+        window.sessionStorage.setItem(DEMO_STORAGE_KEY, 'true');
+        setStoredDemoAccess(true);
+        return;
+      }
+
+      setStoredDemoAccess(window.sessionStorage.getItem(DEMO_STORAGE_KEY) === 'true');
+    } catch {
+      setStoredDemoAccess(false);
+    }
+  }, [hasKeyAccess, pathname]);
+
+  if (!showInvestorShell) {
+    return <AppStateProvider>{appStack}</AppStateProvider>;
+  }
+
+  if (isDemoAppRoute) {
+    return <AppStateProvider>{appStack}</AppStateProvider>;
+  }
+
   return (
     <AppStateProvider>
-      {showInvestorShell ? (
+      {isDemoPage ? (
+        <View style={[styles.demoPage, desktop && styles.demoPageDesktop]}>
+          {hasKeyAccess ? (
+            <>
+              <Pressable onPress={() => router.replace('/')} style={({ pressed }) => [styles.backButton, pressed && styles.waitlistPressed]}>
+                <Text style={styles.backButtonText}>Back to waitlist</Text>
+              </Pressable>
+              <View style={styles.phoneFrame}>
+                {React.createElement('iframe' as any, {
+                  src: demoFrameSrc,
+                  title: '974 Padel private demo',
+                  style: demoIframeStyle,
+                })}
+              </View>
+            </>
+          ) : (
+            <View style={styles.privatePanel}>
+              <Text style={styles.privateTitle}>Private demo preview. Please request access.</Text>
+              <Pressable onPress={() => router.replace('/')} style={({ pressed }) => [styles.waitlist, pressed && styles.waitlistPressed]}>
+                <Text style={styles.waitlistText}>Back to waitlist</Text>
+              </Pressable>
+            </View>
+          )}
+        </View>
+      ) : (
         <View style={[styles.webShell, desktop && styles.webShellDesktop]}>
-          <View style={[styles.investorPanel, !desktop && styles.investorPanelMobile]}>
+          <View style={[styles.investorPanel, styles.investorPanelLanding, !desktop && styles.investorPanelMobile]}>
             <Text style={styles.eyebrow}>974 Padel Qatar</Text>
             <Text style={styles.heroTitle}>The ranking and network layer for Qatar padel.</Text>
             <Text style={styles.heroCopy}>Find players, organize games, verify results, climb rankings, book externally, discover coaches, and build club competition loops.</Text>
@@ -42,17 +113,17 @@ export default function RootLayout() {
             </Pressable>
             <Text style={styles.disclaimer}>Backend-ready MVP. Payments, ads, and admin tools are staged after real accounts and verified data.</Text>
           </View>
-          <View style={styles.appPreview}>{appStack}</View>
         </View>
-      ) : appStack}
+      )}
     </AppStateProvider>
   );
 }
 
 const styles = StyleSheet.create({
   webShell: { flex: 1, backgroundColor: colors.background },
-  webShellDesktop: { flexDirection: 'row', justifyContent: 'center', alignItems: 'stretch', gap: 28, padding: 28 },
+  webShellDesktop: { justifyContent: 'center', alignItems: 'center', padding: 28 },
   investorPanel: { padding: spacing.xl, gap: 16, backgroundColor: colors.deep },
+  investorPanelLanding: { width: '100%', maxWidth: 760, borderRadius: Platform.OS === 'web' ? 28 : 0, borderWidth: Platform.OS === 'web' ? 1 : 0, borderColor: colors.border },
   investorPanelMobile: { paddingTop: 34 },
   eyebrow: { color: colors.hotPink, fontWeight: '900', textTransform: 'uppercase', fontSize: 12 },
   heroTitle: { color: colors.pearl, fontWeight: '900', fontSize: 42, lineHeight: 46, maxWidth: 560 },
@@ -66,5 +137,11 @@ const styles = StyleSheet.create({
   waitlistPressed: { transform: [{ scale: 0.97 }, { translateY: 1 }] },
   waitlistText: { color: colors.deep, fontWeight: '900' },
   disclaimer: { color: colors.muted, fontWeight: '700', maxWidth: 520, fontSize: 12, lineHeight: 18 },
-  appPreview: { flex: 1, width: '100%', maxWidth: 520, alignSelf: 'center', overflow: 'hidden', borderRadius: Platform.OS === 'web' ? 28 : 0, borderWidth: Platform.OS === 'web' ? 1 : 0, borderColor: colors.border },
+  demoPage: { flex: 1, minHeight: '100%' as any, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center', padding: 18, gap: 14 },
+  demoPageDesktop: { padding: 28 },
+  phoneFrame: { width: '100%', maxWidth: 430, height: '100%', maxHeight: 880, minHeight: 720, backgroundColor: colors.deep, overflow: 'hidden', borderRadius: 34, borderWidth: 1, borderColor: colors.border, shadowColor: '#000000', shadowOpacity: 0.3, shadowRadius: 24, shadowOffset: { width: 0, height: 16 } },
+  backButton: { minHeight: 42, borderRadius: radius.pill, backgroundColor: colors.pearl, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 18, borderWidth: 1, borderColor: colors.border },
+  backButtonText: { color: colors.deep, fontWeight: '900' },
+  privatePanel: { width: '100%', maxWidth: 460, backgroundColor: colors.deep, borderRadius: 28, borderWidth: 1, borderColor: colors.border, padding: spacing.xl, gap: 18, alignItems: 'center' },
+  privateTitle: { color: colors.pearl, fontWeight: '900', fontSize: 22, lineHeight: 28, textAlign: 'center' },
 });
