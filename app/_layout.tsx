@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Stack, router, useLocalSearchParams, usePathname } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as Linking from 'expo-linking';
@@ -9,15 +9,14 @@ import { colors, radius, spacing } from '@/theme/tokens';
 
 const DEMO_KEY = '974early';
 const DEMO_STORAGE_KEY = '974-padel-demo-access';
-const demoIframeStyle = {
-  width: '100%',
-  height: '100%',
-  border: 0,
-  backgroundColor: colors.deep,
-};
 
 function firstParam(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
+}
+
+function getWebSearchKey() {
+  if (Platform.OS !== 'web' || typeof window === 'undefined') return undefined;
+  return new URLSearchParams(window.location.search).get('key') ?? undefined;
 }
 
 export default function RootLayout() {
@@ -27,11 +26,10 @@ export default function RootLayout() {
   const [storedDemoAccess, setStoredDemoAccess] = useState(false);
   const showInvestorShell = Platform.OS === 'web';
   const desktop = width >= 900;
-  const key = firstParam(params.key);
+  const key = getWebSearchKey() ?? firstParam(params.key);
   const isDemoPage = pathname === '/demo';
   const hasKeyAccess = key === DEMO_KEY;
   const isDemoAppRoute = showInvestorShell && !isDemoPage && pathname !== '/' && (hasKeyAccess || storedDemoAccess);
-  const demoFrameSrc = useMemo(() => `/courts?demo=1&key=${DEMO_KEY}`, []);
   const appStack = (
     <>
       <StatusBar style="light" />
@@ -67,54 +65,39 @@ export default function RootLayout() {
     return <AppStateProvider>{appStack}</AppStateProvider>;
   }
 
+  if (isDemoPage) {
+    return (
+      <AppStateProvider>
+        <StatusBar style="light" />
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="demo" />
+        </Stack>
+      </AppStateProvider>
+    );
+  }
+
   return (
     <AppStateProvider>
-      {isDemoPage ? (
-        <View style={[styles.demoPage, desktop && styles.demoPageDesktop]}>
-          {hasKeyAccess ? (
-            <>
-              <Pressable onPress={() => router.replace('/')} style={({ pressed }) => [styles.backButton, pressed && styles.waitlistPressed]}>
-                <Text style={styles.backButtonText}>Back to waitlist</Text>
-              </Pressable>
-              <View style={styles.phoneFrame}>
-                {React.createElement('iframe' as any, {
-                  src: demoFrameSrc,
-                  title: '974 Padel private demo',
-                  style: demoIframeStyle,
-                })}
-              </View>
-            </>
-          ) : (
-            <View style={styles.privatePanel}>
-              <Text style={styles.privateTitle}>Private demo preview. Please request access.</Text>
-              <Pressable onPress={() => router.replace('/')} style={({ pressed }) => [styles.waitlist, pressed && styles.waitlistPressed]}>
-                <Text style={styles.waitlistText}>Back to waitlist</Text>
-              </Pressable>
-            </View>
-          )}
-        </View>
-      ) : (
-        <View style={[styles.webShell, desktop && styles.webShellDesktop]}>
-          <View style={[styles.investorPanel, styles.investorPanelLanding, !desktop && styles.investorPanelMobile]}>
-            <Text style={styles.eyebrow}>974 Padel Qatar</Text>
-            <Text style={styles.heroTitle}>The ranking and network layer for Qatar padel.</Text>
-            <Text style={styles.heroCopy}>Find players, organize games, verify results, climb rankings, book externally, discover coaches, and build club competition loops.</Text>
-            <View style={styles.loopBox}>
-              <Text style={styles.loopTitle}>Product loop</Text>
-              <Text style={styles.loopText}>Sign up to find players to challenge to submit proof to confirm result to rank, stats, and credits update.</Text>
-            </View>
-            <View style={styles.modelGrid}>
-              {['Club Pro', 'Tournaments', 'Coach commission', 'Premium players', '974 Credits', 'Partner perks'].map((item) => (
-                <Text key={item} style={styles.modelPill}>{item}</Text>
-              ))}
-            </View>
-            <Pressable onPress={() => Linking.openURL('https://tally.so/r/ODdxeg')} style={({ pressed }) => [styles.waitlist, pressed && styles.waitlistPressed]}>
-              <Text style={styles.waitlistText}>Join the waitlist</Text>
-            </Pressable>
-            <Text style={styles.disclaimer}>Backend-ready MVP. Payments, ads, and admin tools are staged after real accounts and verified data.</Text>
+      <View style={[styles.webShell, desktop && styles.webShellDesktop]}>
+        <View style={[styles.investorPanel, styles.investorPanelLanding, !desktop && styles.investorPanelMobile]}>
+          <Text style={styles.eyebrow}>974 Padel Qatar</Text>
+          <Text style={styles.heroTitle}>The ranking and network layer for Qatar padel.</Text>
+          <Text style={styles.heroCopy}>Find players, organize games, verify results, climb rankings, book externally, discover coaches, and build club competition loops.</Text>
+          <View style={styles.loopBox}>
+            <Text style={styles.loopTitle}>Product loop</Text>
+            <Text style={styles.loopText}>Sign up to find players to challenge to submit proof to confirm result to rank, stats, and credits update.</Text>
           </View>
+          <View style={styles.modelGrid}>
+            {['Club Pro', 'Tournaments', 'Coach commission', 'Premium players', '974 Credits', 'Partner perks'].map((item) => (
+              <Text key={item} style={styles.modelPill}>{item}</Text>
+            ))}
+          </View>
+          <Pressable onPress={() => Linking.openURL('https://tally.so/r/ODdxeg')} style={({ pressed }) => [styles.waitlist, pressed && styles.waitlistPressed]}>
+            <Text style={styles.waitlistText}>Join the waitlist</Text>
+          </Pressable>
+          <Text style={styles.disclaimer}>Backend-ready MVP. Payments, ads, and admin tools are staged after real accounts and verified data.</Text>
         </View>
-      )}
+      </View>
     </AppStateProvider>
   );
 }
@@ -137,11 +120,4 @@ const styles = StyleSheet.create({
   waitlistPressed: { transform: [{ scale: 0.97 }, { translateY: 1 }] },
   waitlistText: { color: colors.deep, fontWeight: '900' },
   disclaimer: { color: colors.muted, fontWeight: '700', maxWidth: 520, fontSize: 12, lineHeight: 18 },
-  demoPage: { flex: 1, minHeight: '100%' as any, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center', padding: 18, gap: 14 },
-  demoPageDesktop: { padding: 28 },
-  phoneFrame: { width: '100%', maxWidth: 430, height: '100%', maxHeight: 880, minHeight: 720, backgroundColor: colors.deep, overflow: 'hidden', borderRadius: 34, borderWidth: 1, borderColor: colors.border, shadowColor: '#000000', shadowOpacity: 0.3, shadowRadius: 24, shadowOffset: { width: 0, height: 16 } },
-  backButton: { minHeight: 42, borderRadius: radius.pill, backgroundColor: colors.pearl, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 18, borderWidth: 1, borderColor: colors.border },
-  backButtonText: { color: colors.deep, fontWeight: '900' },
-  privatePanel: { width: '100%', maxWidth: 460, backgroundColor: colors.deep, borderRadius: 28, borderWidth: 1, borderColor: colors.border, padding: spacing.xl, gap: 18, alignItems: 'center' },
-  privateTitle: { color: colors.pearl, fontWeight: '900', fontSize: 22, lineHeight: 28, textAlign: 'center' },
 });
