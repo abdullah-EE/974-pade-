@@ -13,6 +13,7 @@ import { useAppState } from '@/state/AppState';
 import { colors, radius, spacing } from '@/theme/tokens';
 import { centeredContent } from '@/theme/layout';
 import { Match } from '@/types/models';
+import { isValidScore, validateImageAsset } from '@/utils/validation';
 
 const steps = ['Court', 'Players', 'Score', 'Proof + Review'];
 
@@ -40,6 +41,11 @@ export default function SubmitScreen() {
   };
 
   const submitMatch = () => {
+    if (!isValidScore(score)) {
+      setProofMessage('Use a score like 6-4, 6-3 before submitting.');
+      setStep(2);
+      return;
+    }
     const newMatch: Match = {
       id: `local-${Date.now()}`,
       teamA,
@@ -59,6 +65,11 @@ export default function SubmitScreen() {
   const pickProof = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.8 });
     if (!result.canceled) {
+      const validation = validateImageAsset(result.assets[0]);
+      if (!validation.ok) {
+        setProofMessage(validation.message);
+        return;
+      }
       setProofUri(result.assets[0].uri);
       setProofMessage('Proof photo attached locally.');
     }
@@ -72,6 +83,11 @@ export default function SubmitScreen() {
     }
     const result = await ImagePicker.launchCameraAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.8 });
     if (!result.canceled) {
+      const validation = validateImageAsset(result.assets[0]);
+      if (!validation.ok) {
+        setProofMessage(validation.message);
+        return;
+      }
       setProofUri(result.assets[0].uri);
       setProofMessage('Camera proof attached locally.');
     }

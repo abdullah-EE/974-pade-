@@ -7,6 +7,7 @@ import { PlayerAvatar } from '@/components/common/PlayerAvatar';
 import { useAppState } from '@/state/AppState';
 import { colors, radius, spacing } from '@/theme/tokens';
 import { Area, Level } from '@/types/models';
+import { isValidUsername, sanitizeText, validateImageAsset } from '@/utils/validation';
 
 const levels: Level[] = ['Beginner', 'Intermediate', 'Advanced'];
 const areas: Area[] = ['Lusail', 'Education City', 'Katara', 'Msheireb', 'The Pearl', 'West Bay', 'Aspire', 'Al Waab'];
@@ -26,8 +27,11 @@ export function OnboardingGate() {
   if (account) return null;
 
   const submit = () => {
-    if (!name.trim() || !username.trim()) return;
-    createAccount({ name, username, email, level, favoriteArea, avatarUri, accountRole });
+    if (!sanitizeText(name, 80) || !isValidUsername(username)) {
+      setMessage('Use a real name and a username with 3-24 letters, numbers, dots, or underscores.');
+      return;
+    }
+    createAccount({ name: sanitizeText(name, 80), username: sanitizeText(username, 32), email: sanitizeText(email, 120), level, favoriteArea, avatarUri, accountRole });
   };
 
   const login = async () => {
@@ -38,6 +42,11 @@ export function OnboardingGate() {
   const chooseAvatar = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.8 });
     if (!result.canceled) {
+      const validation = validateImageAsset(result.assets[0]);
+      if (!validation.ok) {
+        setMessage(validation.message);
+        return;
+      }
       setAvatarUri(result.assets[0].uri);
       setMessage('Avatar added locally.');
     }

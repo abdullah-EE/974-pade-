@@ -8,6 +8,7 @@ import { ScreenTransitionWrapper } from '@/components/common/ScreenTransitionWra
 import { StaggeredList } from '@/components/common/StaggeredList';
 import { HorizontalCardRail } from '@/components/common/HorizontalCardRail';
 import { useAppState } from '@/state/AppState';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { colors, radius, spacing } from '@/theme/tokens';
 import { centeredContent } from '@/theme/layout';
 
@@ -16,16 +17,17 @@ const filters = ['Overall', 'This Week', 'Friends', 'Club', 'Beginner', 'Interme
 export default function RankingsScreen() {
   const [filter, setFilter] = useState('Overall');
   const [query, setQuery] = useState('');
+  const debouncedQuery = useDebouncedValue(query);
   const { players, currentUser, friendIds, addFriend, removeFriend } = useAppState();
   const ranked = useMemo(() => {
     const list = [...players];
-    const filtered = list.filter((player) => `${player.name} ${player.username} ${player.club}`.toLowerCase().includes(query.trim().toLowerCase()));
+    const filtered = list.filter((player) => `${player.name} ${player.username} ${player.club}`.toLowerCase().includes(debouncedQuery.trim().toLowerCase()));
     if (filter === 'This Week') return filtered.sort((a, b) => b.movement - a.movement);
     if (filter === 'Friends') return filtered.filter((player) => friendIds.includes(player.id) || player.id === currentUser.id);
     if (filter === 'Club') return filtered.filter((player) => player.club === currentUser.club);
     if (filter === 'Beginner' || filter === 'Intermediate' || filter === 'Advanced') return filtered.filter((player) => player.level === filter);
     return filtered.sort((a, b) => a.rank - b.rank);
-  }, [currentUser.club, currentUser.id, filter, friendIds, players, query]);
+  }, [currentUser.club, currentUser.id, debouncedQuery, filter, friendIds, players]);
 
   return (
     <ScreenTransitionWrapper>

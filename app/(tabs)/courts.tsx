@@ -18,6 +18,7 @@ import { SearchBar } from '@/components/common/SearchBar';
 import { ScreenTransitionWrapper } from '@/components/common/ScreenTransitionWrapper';
 import { TimeSlotChips } from '@/components/common/TimeSlotChips';
 import { VideoCard } from '@/components/common/VideoCard';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { useAppState } from '@/state/AppState';
 import { colors, radius, spacing } from '@/theme/tokens';
 import { centeredContent } from '@/theme/layout';
@@ -31,6 +32,7 @@ const searchModes = ['Courts', 'Players', 'Coaches', 'Videos'] as const;
 
 export default function PlayScreen() {
   const [query, setQuery] = useState('');
+  const debouncedQuery = useDebouncedValue(query);
   const [filter, setFilter] = useState('All');
   const [mode, setMode] = useState<(typeof searchModes)[number]>('Courts');
   const [sheetCourt, setSheetCourt] = useState<Court | null>(null);
@@ -43,7 +45,7 @@ export default function PlayScreen() {
   const filteredCourts = useMemo(() => {
     return courts.filter((court) => {
       const text = `${court.name} ${court.area}`.toLowerCase();
-      const queryMatch = text.includes(query.trim().toLowerCase());
+      const queryMatch = text.includes(debouncedQuery.trim().toLowerCase());
       const filterMatch =
         filter === 'All' ||
         filter === 'Tonight' ||
@@ -52,22 +54,22 @@ export default function PlayScreen() {
         court.area === filter;
       return queryMatch && filterMatch;
     });
-  }, [filter, query]);
+  }, [debouncedQuery, filter]);
   const filteredPlayers = useMemo(() => {
-    const value = query.trim().toLowerCase();
+    const value = debouncedQuery.trim().toLowerCase();
     return players
       .filter((player) => player.id !== currentUser.id)
       .filter((player) => !value || `${player.name} ${player.username} ${player.club} ${player.level}`.toLowerCase().includes(value))
       .slice(0, 8);
-  }, [currentUser.id, players, query]);
+  }, [currentUser.id, debouncedQuery, players]);
   const filteredCoaches = useMemo(() => {
-    const value = query.trim().toLowerCase();
+    const value = debouncedQuery.trim().toLowerCase();
     return coaches.filter((coach) => !value || `${coach.name} ${coach.specialty} ${coach.area}`.toLowerCase().includes(value));
-  }, [coaches, query]);
+  }, [coaches, debouncedQuery]);
   const filteredVideos = useMemo(() => {
-    const value = query.trim().toLowerCase();
+    const value = debouncedQuery.trim().toLowerCase();
     return videos.filter((video) => !value || `${video.title} ${video.creatorName} ${video.tag}`.toLowerCase().includes(value));
-  }, [query, videos]);
+  }, [debouncedQuery, videos]);
 
   const openCourt = (id: string) => router.push(`/court/${id}`);
   const startRanked = (courtId: string) => router.push({ pathname: '/(tabs)/submit', params: { courtId } });

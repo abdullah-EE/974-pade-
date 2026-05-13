@@ -22,6 +22,7 @@ import { CosmeticItem } from '@/types/Wallet';
 import { Coach } from '@/types/Coach';
 import { VideoPost, VideoTag } from '@/types/VideoPost';
 import { formatPlayerStatus, winRate } from '@/utils/format';
+import { sanitizeText, validateImageAsset } from '@/utils/validation';
 
 export default function ProfileScreen() {
   const { currentUser: me, players, courts, matches, challenges, friendIds, coaches, videos, wallet, cosmetics, activeCosmeticIds, updateAccount, updateMatchStatus, updateChallenge, requestCoachSession, previewCosmetic, selectCosmetic, buyCosmetic, toggleVideoLike, toggleVideoSave, createCoachProfile, uploadVideo } = useAppState();
@@ -55,13 +56,13 @@ export default function ProfileScreen() {
       name: me.name,
       avatarUrl: me.avatar,
       heroImageUrl: favoriteCourt.image as string,
-      specialty: coachSpecialty,
+      specialty: sanitizeText(coachSpecialty, 80),
       level: me.level,
       area: me.area || favoriteCourt.area,
       courtId: favoriteCourt.id,
-      priceLabel: coachPrice,
-      bio: coachBio,
-      specialties: coachSpecialty.split(',').map((item) => item.trim()).filter(Boolean),
+      priceLabel: sanitizeText(coachPrice, 40),
+      bio: sanitizeText(coachBio, 300),
+      specialties: coachSpecialty.split(',').map((item) => sanitizeText(item, 32)).filter(Boolean),
       availableSlots: ['Tonight, 8:00 PM', 'Tomorrow, 7:30 PM', 'Saturday, 10:00 AM'],
     });
     setSheet(null);
@@ -70,6 +71,11 @@ export default function ProfileScreen() {
   const pickVideoThumb = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.8 });
     if (!result.canceled) {
+      const validation = validateImageAsset(result.assets[0]);
+      if (!validation.ok) {
+        setUploadMessage(validation.message);
+        return;
+      }
       setVideoThumb(result.assets[0].uri);
       setUploadMessage('Thumbnail attached locally.');
     }
@@ -77,8 +83,8 @@ export default function ProfileScreen() {
 
   const submitVideoUpload = () => {
     uploadVideo({
-      title: videoTitle,
-      description: videoDescription,
+      title: sanitizeText(videoTitle, 100),
+      description: sanitizeText(videoDescription, 300),
       thumbnailUrl: videoThumb || (favoriteCourt.image as string),
       duration: '0:30',
       tag: videoTag,
@@ -89,6 +95,8 @@ export default function ProfileScreen() {
   const changeAvatar = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.85 });
     if (!result.canceled) {
+      const validation = validateImageAsset(result.assets[0]);
+      if (!validation.ok) return;
       updateAccount({ avatarUri: result.assets[0].uri, avatarUrl: result.assets[0].uri });
     }
   };

@@ -4,10 +4,13 @@ import { mockVideos } from '@/data/mockVideos';
 import { mockCosmetics, mockWallet } from '@/data/mockWallet';
 import { challenges as initialChallenges, courts as initialCourts, matches as initialMatches, openGames as initialOpenGames, players as initialPlayers } from '@/data/mockData';
 import { accountService } from '@/services/accountService';
+import { rankingService } from '@/services/rankingService';
 import { Coach } from '@/types/Coach';
 import { VideoPost } from '@/types/VideoPost';
 import { CosmeticItem, Wallet } from '@/types/Wallet';
 import { Area, Challenge, ChallengeStatus, Court, Level, LocalAccount, Match, MatchStatus, OpenGame, Player } from '@/types/models';
+import { canRunAction } from '@/utils/rateLimit';
+import { sanitizeText } from '@/utils/validation';
 
 interface CreateChallengeInput {
   opponentId?: string;
@@ -166,6 +169,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 
   const addFriend = (id: string) =>
     setFriendIds((items) => {
+      if (!canRunAction(`friend-${id}`, 900)) return items;
       const next = items.includes(id) ? items : [...items, id];
       accountService.saveFriendIds(next).catch(() => undefined);
       return next;
@@ -178,6 +182,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     });
 
   const createChallenge = (input: CreateChallengeInput) => {
+    if (!canRunAction(`challenge-${currentUser.id}-${input.courtId}`, 1800)) return challenges[0];
     const challenge: Challenge = {
       id: `local-${Date.now()}`,
       from: currentUser.id,
@@ -188,7 +193,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       level: input.level,
       status: 'Sent',
       type: input.type || 'doubles',
-      note: input.note?.trim(),
+      note: sanitizeText(input.note || '', 180),
       isPrivate: input.privacy === 'Private invite',
       privacy: input.privacy,
     };
@@ -215,14 +220,26 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     setChallenges((items) => items.map((item) => (item.id === id ? { ...item, status } : item)));
   };
 
-  const addMatch = (match: Match) => setMatches((items) => [match, ...items]);
+  const addMatch = (match: Match) => {
+    if (!canRunAction(`match-${currentUser.id}-${match.courtId}`, 1800)) return;
+    setMatches((items) => [match, ...items]);
+  };
   const updateMatchStatus = (id: string, status: MatchStatus) => {
+    const target = matches.find((match) => match.id === id);
     setMatches((items) => items.map((item) => (item.id === id ? { ...item, status } : item)));
-    if (status === 'Verified') {
+    if (status === 'Verified' && target && [...target.teamA, ...target.teamB].includes(currentUser.id) && canRunAction(`verified-credit-${id}`, 60 * 60 * 1000)) {
+      const delta = rankingService.previewDelta(players, target);
+      const nextPlayer = rankingService.applyConfirmedMatch(currentUser, { ...target, status: 'Verified' }, delta);
+      updateAccount({
+        rating: nextPlayer.rating,
+        weeklyPoints: nextPlayer.weeklyPoints,
+        verifiedMatches: nextPlayer.verifiedMatches,
+      });
+      const creditAmount = nextPlayer.streak >= 3 ? 180 : 120;
       setWallet((next) => ({
         ...next,
-        credits: next.credits + 120,
-        transactions: [{ id: `tx-${Date.now()}`, userId: currentUser.id, amount: 120, reason: 'verifiedMatch', createdAt: new Date().toISOString() }, ...next.transactions],
+        credits: next.credits + creditAmount,
+        transactions: [{ id: `tx-${Date.now()}`, userId: currentUser.id, amount: creditAmount, reason: nextPlayer.streak >= 3 ? 'winStreak' : 'verifiedMatch', createdAt: new Date().toISOString() }, ...next.transactions],
       }));
     }
   };
@@ -268,6 +285,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const createCoachProfile = (input: Omit<Coach, 'id' | 'rating' | 'requested'>) => {
     const coach: Coach = {
       ...input,
+      specialty: sanitizeText(input.specialty, 80),
+      bio: sanitizeText(input.bio, 300),
       id: `coach-local-${Date.now()}`,
       rating: 5,
       requested: false,
@@ -278,6 +297,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const uploadVideo = (input: Omit<VideoPost, 'id' | 'creatorId' | 'creatorName' | 'views' | 'createdAt'>) => {
     const video: VideoPost = {
       ...input,
+      title: sanitizeText(input.title, 100),
+      description: sanitizeText(input.description, 300),
       id: `video-local-${Date.now()}`,
       creatorId: currentUser.id,
       creatorName: currentUser.name,
