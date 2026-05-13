@@ -23,7 +23,9 @@ export function CollapsibleSection({
           <Text numberOfLines={1} ellipsizeMode="tail" style={styles.title}>{title}</Text>
           {action ? <Text numberOfLines={1} ellipsizeMode="tail" style={styles.action}>{action}</Text> : null}
         </View>
-        <MaterialCommunityIcons name={open ? 'chevron-up' : 'chevron-down'} size={22} color={colors.primary} />
+        <View style={styles.chevron}>
+          <MaterialCommunityIcons name={open ? 'chevron-up' : 'chevron-down'} size={22} color={colors.hotPink} />
+        </View>
       </Pressable>
       <AnimatePresence>
         {open ? (
@@ -38,10 +40,11 @@ export function CollapsibleSection({
 
 const styles = StyleSheet.create({
   wrap: { gap: 10 },
-  header: { minHeight: 52, flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 6, paddingHorizontal: 4, borderRadius: radius.lg },
+  header: { minHeight: 52, flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 7, paddingHorizontal: 10, borderRadius: radius.lg, backgroundColor: colors.glass, borderWidth: 1, borderColor: colors.border },
   pressed: { transform: [{ scale: 0.99 }] },
   titleWrap: { flex: 1, minWidth: 0 },
   title: { color: colors.textPrimary, fontWeight: '900', fontSize: 19 },
   action: { color: colors.textSecondary, fontWeight: '800', marginTop: 3, fontSize: 12 },
+  chevron: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.softMaroon, borderWidth: 1, borderColor: colors.border },
   body: { gap: spacing.sm },
 });

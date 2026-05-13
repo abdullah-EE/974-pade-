@@ -25,6 +25,7 @@ const timeOptions = [
 export default function ChallengesScreen() {
   const { challenges, courts, openGames, players, currentUser, friendIds, createChallenge, updateChallenge, joinOpenGame } = useAppState();
   const [sheet, setSheet] = useState(false);
+  const [challengeStep, setChallengeStep] = useState(0);
   const [success, setSuccess] = useState(false);
   const [courtId, setCourtId] = useState(courts[0].id);
   const [opponentId, setOpponentId] = useState(players[4].id);
@@ -66,11 +67,11 @@ export default function ChallengesScreen() {
           <Text style={styles.kicker}>Games and rivalries</Text>
           <Text style={styles.title}>Challenges</Text>
         </View>
-        <PremiumButton label="Create" icon="plus" onPress={() => setSheet(true)} />
+        <PremiumButton label="Create" icon="plus" onPress={() => { setChallengeStep(0); setSheet(true); }} />
       </View>
 
       <CollapsibleSection title="Create Challenge" action="Singles, doubles, open game" defaultOpen>
-        <PremiumButton label="Create new challenge" icon="plus" onPress={() => setSheet(true)} />
+        <PremiumButton label="Create new challenge" icon="plus" onPress={() => { setChallengeStep(0); setSheet(true); }} />
       </CollapsibleSection>
 
       <CollapsibleSection title="Open Games" action={`${openGames.length} live`} defaultOpen>
@@ -93,68 +94,99 @@ export default function ChallengesScreen() {
       <CollapsibleSection title="Friends Only" action="Local privacy view">{renderChallenges('Sent')}</CollapsibleSection>
       <CollapsibleSection title="Private Invites" action="Invite-only matches">{renderChallenges('Incoming')}</CollapsibleSection>
 
-      <ActionSheet visible={sheet} title="Create Challenge" subtitle="Pick a rival, venue, level, and time. This stays local for now." onClose={() => setSheet(false)}>
-        <Text style={styles.sheetLabel}>Court</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.selector}>
-          {courts.slice(0, 6).map((court) => (
-            <Pressable key={court.id} onPress={() => setCourtId(court.id)} style={({ pressed }) => [styles.choice, courtId === court.id && styles.choiceActive, pressed && styles.pressedChoice]}>
-              <Text style={[styles.choiceText, courtId === court.id && styles.choiceTextActive]}>{court.name}</Text>
-            </Pressable>
-          ))}
-        </ScrollView>
-        <Text style={styles.sheetLabel}>Opponent</Text>
-        <TextInput value={opponentQuery} onChangeText={setOpponentQuery} placeholder="Search opponent" placeholderTextColor={colors.textSecondary} style={styles.input} />
-        <Text style={styles.sheetLabel}>Challenge type</Text>
-        <View style={styles.selector}>
-          {(['singles', 'doubles', 'open game'] as const).map((item) => (
-            <Pressable key={item} onPress={() => setChallengeType(item)} style={({ pressed }) => [styles.choice, challengeType === item && styles.choiceActive, pressed && styles.pressedChoice]}>
-              <Text style={[styles.choiceText, challengeType === item && styles.choiceTextActive]}>{item}</Text>
-            </Pressable>
-          ))}
+      <ActionSheet visible={sheet} title="Create Challenge" subtitle="Guided setup. Choose one thing at a time." onClose={() => setSheet(false)}>
+        <View style={styles.stepDots}>
+          {[0, 1, 2, 3].map((item) => <View key={item} style={[styles.stepDot, item <= challengeStep && styles.stepDotActive]} />)}
         </View>
-        <Text style={styles.sheetLabel}>Privacy</Text>
-        <View style={styles.selector}>
-          {privacyOptions.map((option) => (
-            <Pressable key={option} onPress={() => setPrivacy(option)} style={({ pressed }) => [styles.choice, privacy === option && styles.choiceActive, pressed && styles.pressedChoice]}>
-              <Text style={[styles.choiceText, privacy === option && styles.choiceTextActive]}>{option}</Text>
+        {challengeStep === 0 ? (
+          <>
+            <Text style={styles.sheetLabel}>Court</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.selector}>
+              {courts.slice(0, 6).map((court) => (
+                <Pressable key={court.id} onPress={() => setCourtId(court.id)} style={({ pressed }) => [styles.choice, courtId === court.id && styles.choiceActive, pressed && styles.pressedChoice]}>
+                  <Text numberOfLines={1} style={[styles.choiceText, courtId === court.id && styles.choiceTextActive]}>{court.name}</Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+            <Text style={styles.sheetLabel}>Challenge type</Text>
+            <View style={styles.selector}>
+              {(['singles', 'doubles', 'open game'] as const).map((item) => (
+                <Pressable key={item} onPress={() => setChallengeType(item)} style={({ pressed }) => [styles.choice, challengeType === item && styles.choiceActive, pressed && styles.pressedChoice]}>
+                  <Text style={[styles.choiceText, challengeType === item && styles.choiceTextActive]}>{item}</Text>
+                </Pressable>
+              ))}
+            </View>
+            <PremiumButton label="Next: privacy" icon="arrow-right" onPress={() => setChallengeStep(1)} />
+          </>
+        ) : null}
+        {challengeStep === 1 ? (
+          <>
+            <Text style={styles.sheetLabel}>Privacy</Text>
+            <View style={styles.selector}>
+              {privacyOptions.map((option) => (
+                <Pressable key={option} onPress={() => setPrivacy(option)} style={({ pressed }) => [styles.choice, privacy === option && styles.choiceActive, pressed && styles.pressedChoice]}>
+                  <Text style={[styles.choiceText, privacy === option && styles.choiceTextActive]}>{option}</Text>
+                </Pressable>
+              ))}
+            </View>
+            <Pressable onPress={() => setOpenInvite((value) => !value)} style={({ pressed }) => [styles.openInvite, openInvite && styles.choiceActive, pressed && styles.pressedChoice]}>
+              <Text style={[styles.choiceText, openInvite && styles.choiceTextActive]}>{openInvite ? 'Open invite enabled' : 'Select a specific opponent'}</Text>
+              <Text style={[styles.openInviteMeta, openInvite && styles.choiceTextActive]}>{openInvite ? 'Creates an open game when privacy is Public.' : 'Private and friends-only challenges use selected players.'}</Text>
             </Pressable>
-          ))}
-        </View>
-        <Pressable onPress={() => setOpenInvite((value) => !value)} style={({ pressed }) => [styles.openInvite, openInvite && styles.choiceActive, pressed && styles.pressedChoice]}>
-          <Text style={[styles.choiceText, openInvite && styles.choiceTextActive]}>{openInvite ? 'Open invite enabled' : 'Select a specific opponent'}</Text>
-          <Text style={[styles.openInviteMeta, openInvite && styles.choiceTextActive]}>{openInvite ? 'Creates a public/open game when privacy is Public.' : 'Private and friends-only challenges use selected players.'}</Text>
-        </Pressable>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.selector}>
-          {!openInvite ? players
-            .filter((player) => player.id !== currentUser.id)
-            .filter((player) => privacy === 'Public' || friendIds.includes(player.id))
-            .filter((player) => `${player.name} ${player.username}`.toLowerCase().includes(opponentQuery.trim().toLowerCase()))
-            .slice(0, 8)
-            .map((player) => (
-            <Pressable key={player.id} onPress={() => setOpponentId(player.id)} style={({ pressed }) => [styles.choice, opponentId === player.id && styles.choiceActive, pressed && styles.pressedChoice]}>
-              <Text style={[styles.choiceText, opponentId === player.id && styles.choiceTextActive]}>{player.name}</Text>
-            </Pressable>
-          )) : null}
-        </ScrollView>
-        <Text style={styles.sheetLabel}>Level</Text>
-        <View style={styles.selector}>
-          {levels.map((item) => (
-            <Pressable key={item} onPress={() => setLevel(item)} style={({ pressed }) => [styles.choice, level === item && styles.choiceActive, pressed && styles.pressedChoice]}>
-              <Text style={[styles.choiceText, level === item && styles.choiceTextActive]}>{item}</Text>
-            </Pressable>
-          ))}
-        </View>
-        <Text style={styles.sheetLabel}>Time</Text>
-        <View style={styles.selector}>
-          {timeOptions.map((item) => (
-            <Pressable key={item.value} onPress={() => setStartsAt(item.value)} style={({ pressed }) => [styles.choice, startsAt === item.value && styles.choiceActive, pressed && styles.pressedChoice]}>
-              <Text style={[styles.choiceText, startsAt === item.value && styles.choiceTextActive]}>{item.label}</Text>
-            </Pressable>
-          ))}
-        </View>
-        <Text style={styles.sheetLabel}>Note</Text>
-        <TextInput value={note} onChangeText={setNote} placeholder="Optional message" multiline style={styles.note} />
-        <PremiumButton label="Send challenge" icon="send-outline" onPress={submitChallenge} />
+            <View style={styles.navRow}>
+              <PremiumButton label="Back" variant="subtle" icon="arrow-left" onPress={() => setChallengeStep(0)} style={{ flex: 1 }} />
+              <PremiumButton label="Next: opponent" icon="arrow-right" onPress={() => setChallengeStep(2)} style={{ flex: 1 }} />
+            </View>
+          </>
+        ) : null}
+        {challengeStep === 2 ? (
+          <>
+            <Text style={styles.sheetLabel}>Opponent</Text>
+            <TextInput value={opponentQuery} onChangeText={setOpponentQuery} placeholder="Search opponent" placeholderTextColor={colors.textSecondary} style={styles.input} />
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.selector}>
+              {!openInvite ? players
+                .filter((player) => player.id !== currentUser.id)
+                .filter((player) => privacy === 'Public' || friendIds.includes(player.id))
+                .filter((player) => `${player.name} ${player.username}`.toLowerCase().includes(opponentQuery.trim().toLowerCase()))
+                .slice(0, 8)
+                .map((player) => (
+                <Pressable key={player.id} onPress={() => setOpponentId(player.id)} style={({ pressed }) => [styles.choice, opponentId === player.id && styles.choiceActive, pressed && styles.pressedChoice]}>
+                  <Text numberOfLines={1} style={[styles.choiceText, opponentId === player.id && styles.choiceTextActive]}>{player.name}</Text>
+                </Pressable>
+              )) : <Text style={styles.detailText}>Open invite selected. No opponent needed.</Text>}
+            </ScrollView>
+            <View style={styles.navRow}>
+              <PremiumButton label="Back" variant="subtle" icon="arrow-left" onPress={() => setChallengeStep(1)} style={{ flex: 1 }} />
+              <PremiumButton label="Next: time" icon="arrow-right" onPress={() => setChallengeStep(3)} style={{ flex: 1 }} />
+            </View>
+          </>
+        ) : null}
+        {challengeStep === 3 ? (
+          <>
+            <Text style={styles.sheetLabel}>Level</Text>
+            <View style={styles.selector}>
+              {levels.map((item) => (
+                <Pressable key={item} onPress={() => setLevel(item)} style={({ pressed }) => [styles.choice, level === item && styles.choiceActive, pressed && styles.pressedChoice]}>
+                  <Text style={[styles.choiceText, level === item && styles.choiceTextActive]}>{item}</Text>
+                </Pressable>
+              ))}
+            </View>
+            <Text style={styles.sheetLabel}>Time</Text>
+            <View style={styles.selector}>
+              {timeOptions.map((item) => (
+                <Pressable key={item.value} onPress={() => setStartsAt(item.value)} style={({ pressed }) => [styles.choice, startsAt === item.value && styles.choiceActive, pressed && styles.pressedChoice]}>
+                  <Text style={[styles.choiceText, startsAt === item.value && styles.choiceTextActive]}>{item.label}</Text>
+                </Pressable>
+              ))}
+            </View>
+            <Text style={styles.sheetLabel}>Note</Text>
+            <TextInput value={note} onChangeText={setNote} placeholder="Optional message" multiline style={styles.note} />
+            <View style={styles.navRow}>
+              <PremiumButton label="Back" variant="subtle" icon="arrow-left" onPress={() => setChallengeStep(2)} style={{ flex: 1 }} />
+              <PremiumButton label="Send challenge" icon="send-outline" onPress={submitChallenge} style={{ flex: 1 }} />
+            </View>
+          </>
+        ) : null}
       </ActionSheet>
 
       <ActionSheet visible={success} title="Challenge sent" subtitle="Your challenge now appears in Sent Challenges and can be updated locally." onClose={() => setSuccess(false)}>
@@ -207,6 +239,10 @@ const styles = StyleSheet.create({
   note: { minHeight: 72, borderWidth: 1, borderColor: colors.border, borderRadius: radius.md, padding: 12, color: colors.textPrimary, fontWeight: '800', backgroundColor: colors.glass },
   detailText: { color: colors.textSecondary, fontWeight: '800', lineHeight: 20 },
   detailActions: { flexDirection: 'row', gap: 8 },
+  navRow: { flexDirection: 'row', gap: 8 },
+  stepDots: { flexDirection: 'row', gap: 6 },
+  stepDot: { flex: 1, height: 6, borderRadius: radius.pill, backgroundColor: colors.divider },
+  stepDotActive: { backgroundColor: colors.hotPink },
   success: { backgroundColor: colors.softMaroon, borderRadius: radius.lg, padding: 16 },
   successText: { color: colors.pearl, fontWeight: '900', textAlign: 'center' },
 });

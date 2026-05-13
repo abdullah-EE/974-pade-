@@ -13,6 +13,8 @@ export interface CosmeticItem {
   price: number;
   premiumOnly?: boolean;
   unlocked?: boolean;
+  equipped?: boolean;
+  description?: string;
 }
 
 export interface UserCosmetic {

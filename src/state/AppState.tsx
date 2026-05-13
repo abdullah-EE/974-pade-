@@ -47,6 +47,8 @@ interface AppStateValue {
   toggleVideoSave: (id: string) => void;
   previewCosmetic: (id: string) => void;
   selectCosmetic: (id: string) => void;
+  buyCosmetic: (id: string) => boolean;
+  earnCredits: (amount: number, reason: Wallet['transactions'][number]['reason']) => void;
 }
 
 const AppStateContext = createContext<AppStateValue | null>(null);
@@ -197,20 +199,54 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   };
 
   const addMatch = (match: Match) => setMatches((items) => [match, ...items]);
-  const updateMatchStatus = (id: string, status: MatchStatus) => setMatches((items) => items.map((item) => (item.id === id ? { ...item, status } : item)));
+  const updateMatchStatus = (id: string, status: MatchStatus) => {
+    setMatches((items) => items.map((item) => (item.id === id ? { ...item, status } : item)));
+    if (status === 'Verified') {
+      setWallet((next) => ({
+        ...next,
+        credits: next.credits + 120,
+        transactions: [{ id: `tx-${Date.now()}`, userId: currentUser.id, amount: 120, reason: 'verifiedMatch', createdAt: new Date().toISOString() }, ...next.transactions],
+      }));
+    }
+  };
   const requestCoachSession = (id: string, slot: string) => {
     setCoaches((items) => items.map((coach) => (coach.id === id ? { ...coach, requested: true, availableSlots: coach.availableSlots.filter((item) => item !== slot) } : coach)));
   };
   const toggleVideoLike = (id: string) => setVideos((items) => items.map((video) => (video.id === id ? { ...video, liked: !video.liked } : video)));
   const toggleVideoSave = (id: string) => setVideos((items) => items.map((video) => (video.id === id ? { ...video, saved: !video.saved } : video)));
-  const previewCosmetic = (id: string) => setActiveCosmeticIds((items) => (items.includes(id) ? items : [id, ...items]));
+  const previewCosmetic = (id: string) => setActiveCosmeticIds((items) => (items.includes(id) ? items : [id, ...items.slice(0, 2)]));
   const selectCosmetic = (id: string) => {
     const item = cosmetics.find((cosmetic) => cosmetic.id === id);
     if (!item || !item.unlocked) return;
-    setActiveCosmeticIds((items) => (items.includes(id) ? items : [id, ...items]));
+    setCosmetics((items) =>
+      items.map((cosmetic) => (cosmetic.type === item.type ? { ...cosmetic, equipped: cosmetic.id === id } : cosmetic)),
+    );
+    setActiveCosmeticIds((items) => (items.includes(id) ? items : [id, ...items.slice(0, 3)]));
+  };
+  const buyCosmetic = (id: string) => {
+    const item = cosmetics.find((cosmetic) => cosmetic.id === id);
+    if (!item || item.unlocked || wallet.credits < item.price) return false;
+    if (item.premiumOnly && currentUser.subscriptionTier !== 'Premium') return false;
+    setWallet((next) => ({
+      ...next,
+      credits: next.credits - item.price,
+      transactions: [
+        { id: `tx-${Date.now()}`, userId: currentUser.id, amount: -item.price, reason: 'cosmeticSpend', createdAt: new Date().toISOString() },
+        ...next.transactions,
+      ],
+    }));
+    setCosmetics((items) => items.map((cosmetic) => (cosmetic.id === id ? { ...cosmetic, unlocked: true } : cosmetic)));
+    return true;
+  };
+  const earnCredits = (amount: number, reason: Wallet['transactions'][number]['reason']) => {
+    setWallet((next) => ({
+      ...next,
+      credits: next.credits + amount,
+      transactions: [{ id: `tx-${Date.now()}`, userId: currentUser.id, amount, reason, createdAt: new Date().toISOString() }, ...next.transactions],
+    }));
   };
 
-  const value = { account, currentUser, players, courts, openGames, challenges, matches, coaches, videos, wallet, cosmetics, activeCosmeticIds, friendIds, createAccount, addFriend, removeFriend, joinOpenGame, createChallenge, updateChallenge, addMatch, updateMatchStatus, requestCoachSession, toggleVideoLike, toggleVideoSave, previewCosmetic, selectCosmetic };
+  const value = { account, currentUser, players, courts, openGames, challenges, matches, coaches, videos, wallet, cosmetics, activeCosmeticIds, friendIds, createAccount, addFriend, removeFriend, joinOpenGame, createChallenge, updateChallenge, addMatch, updateMatchStatus, requestCoachSession, toggleVideoLike, toggleVideoSave, previewCosmetic, selectCosmetic, buyCosmetic, earnCredits };
 
   return <AppStateContext.Provider value={value}>{hydrated ? children : null}</AppStateContext.Provider>;
 }

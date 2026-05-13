@@ -23,7 +23,7 @@ import { VideoPost } from '@/types/VideoPost';
 import { formatPlayerStatus, winRate } from '@/utils/format';
 
 export default function ProfileScreen() {
-  const { currentUser: me, players, courts, matches, challenges, friendIds, coaches, videos, wallet, cosmetics, activeCosmeticIds, updateMatchStatus, updateChallenge, requestCoachSession, previewCosmetic, selectCosmetic, toggleVideoLike, toggleVideoSave } = useAppState();
+  const { currentUser: me, players, courts, matches, challenges, friendIds, coaches, videos, wallet, cosmetics, activeCosmeticIds, updateMatchStatus, updateChallenge, requestCoachSession, previewCosmetic, selectCosmetic, buyCosmetic, toggleVideoLike, toggleVideoSave } = useAppState();
   const [sheet, setSheet] = useState<'edit' | 'settings' | 'premium' | null>(null);
   const [coachSheet, setCoachSheet] = useState<Coach | null>(null);
   const [videoSheet, setVideoSheet] = useState<VideoPost | null>(null);
@@ -162,10 +162,21 @@ export default function ProfileScreen() {
           {cosmetics.map((item) => (
             <View key={item.id} style={[styles.cosmeticCard, activeCosmeticIds.includes(item.id) && styles.cosmeticActive]}>
               <Text style={styles.favoriteTitle}>{item.name}</Text>
-              <Text style={styles.panelMeta}>{item.unlocked ? 'Unlocked' : `${item.price} credits${item.premiumOnly ? ' - Premium' : ''}`}</Text>
-              <View style={styles.cosmeticActions}>
-                <PremiumButton label="Preview" variant="secondary" icon="eye-outline" onPress={() => { previewCosmetic(item.id); setCosmeticSheet(item); }} style={{ flex: 1 }} />
-                <PremiumButton label={item.unlocked ? 'Select' : 'Locked'} variant={item.unlocked ? 'primary' : 'subtle'} icon={item.unlocked ? 'check' : 'lock-outline'} onPress={() => (item.unlocked ? selectCosmetic(item.id) : setCosmeticSheet(item))} style={{ flex: 1 }} />
+                <Text style={styles.panelMeta}>{item.unlocked ? (item.equipped ? 'Equipped' : 'Unlocked') : `${item.price} credits${item.premiumOnly ? ' - Premium' : ''}`}</Text>
+                {item.description ? <Text style={styles.panelMeta}>{item.description}</Text> : null}
+                <View style={styles.cosmeticActions}>
+                  <PremiumButton label="Preview" variant="secondary" icon="eye-outline" onPress={() => { previewCosmetic(item.id); setCosmeticSheet(item); }} style={{ flex: 1 }} />
+                <PremiumButton
+                  label={item.unlocked ? (item.equipped ? 'Equipped' : 'Equip') : item.premiumOnly && me.subscriptionTier !== 'Premium' ? 'Premium' : 'Buy'}
+                  variant={item.unlocked ? 'primary' : 'subtle'}
+                  icon={item.unlocked ? 'check' : 'lock-open-outline'}
+                  onPress={() => {
+                    if (item.unlocked) selectCosmetic(item.id);
+                    else if (buyCosmetic(item.id)) setCosmeticSheet({ ...item, unlocked: true });
+                    else setCosmeticSheet(item);
+                  }}
+                  style={{ flex: 1 }}
+                />
               </View>
             </View>
           ))}
@@ -218,7 +229,13 @@ export default function ProfileScreen() {
         ) : null}
       </ActionSheet>
       <ActionSheet visible={!!cosmeticSheet} title={cosmeticSheet?.name || 'Cosmetic'} subtitle={cosmeticSheet?.unlocked ? 'Unlocked cosmetic' : 'Locked cosmetic preview'} onClose={() => setCosmeticSheet(null)}>
-        <Text style={styles.panelMeta}>{cosmeticSheet?.premiumOnly ? 'Premium-only cosmetic. Payment and premium unlocks connect later.' : 'Credits spending connects later; preview is local for now.'}</Text>
+        <Text style={styles.panelMeta}>
+          {cosmeticSheet?.unlocked
+            ? 'Unlocked locally. Equip it from Customization.'
+            : cosmeticSheet?.premiumOnly && me.subscriptionTier !== 'Premium'
+              ? 'Premium-only cosmetic. Premium checkout connects later.'
+              : `Costs ${cosmeticSheet?.price || 0} 974 Credits. Earn more from verified matches and challenges.`}
+        </Text>
         <PremiumButton label="Close preview" icon="check" onPress={() => setCosmeticSheet(null)} />
       </ActionSheet>
     </ScrollView>
