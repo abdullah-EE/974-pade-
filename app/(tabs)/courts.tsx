@@ -98,8 +98,8 @@ export default function PlayScreen() {
           <FloatingActionCard title="Find Players" meta="Search rivals" icon="account-search-outline" onPress={() => setMode('Players')} />
         </View>
         <View style={styles.quickGrid}>
+          <FloatingActionCard title="Submit Match" meta="Proof + confirm" icon="clipboard-check-outline" onPress={() => router.push('/(tabs)/submit')} />
           <FloatingActionCard title="Find Coach" meta="Book locally" icon="whistle-outline" onPress={() => setMode('Coaches')} />
-          <FloatingActionCard title="Watch Clips" meta="Tips & highlights" icon="play-circle-outline" onPress={() => setMode('Videos')} />
         </View>
       </CollapsibleSection>
       <View style={styles.modeRow}>

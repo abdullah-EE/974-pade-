@@ -175,7 +175,7 @@ export default function ProfileScreen() {
         </View>
       </CollapsibleSection>
 
-      <CollapsibleSection title="Friends" action={`${friendIds.length} players`} defaultOpen>
+      <CollapsibleSection title="Friends" action={`${friendIds.length} players`}>
         <TextInput value={friendSearch} onChangeText={setFriendSearch} placeholder="Search friends" placeholderTextColor={colors.textSecondary} style={styles.friendSearch} />
         <View style={styles.friendStrip}>
           {friendIds
@@ -237,7 +237,7 @@ export default function ProfileScreen() {
       <CollapsibleSection title="Wallet/Credits" action={`${wallet.credits} 974 Credits`} defaultOpen>
         <View style={styles.walletPanel}>
           <AnimatedNumber value={wallet.credits} style={styles.walletBig} />
-          <Text style={styles.walletCopy}>974 Credits earned from verified matches, streaks, challenges, profile completion, and future clip uploads.</Text>
+          <Text style={styles.walletCopy}>Earned from verified matches, streaks, referrals, tournaments, and clips. Credits unlock cosmetics and perks only, never ranking.</Text>
         </View>
       </CollapsibleSection>
 
@@ -285,8 +285,23 @@ export default function ProfileScreen() {
       <CollapsibleSection title="Premium" action="Future upgrade">
         <View style={styles.panel}>
           <Text style={styles.panelTitle}>Premium preview</Text>
-          <Text style={styles.panelMeta}>No ads, advanced stats, premium themes, priority challenge visibility, deeper match history, private groups, and exclusive cosmetics.</Text>
+          <Text style={styles.panelMeta}>Advanced stats, rival comparison, deeper match history, premium profile themes, priority challenge visibility, private groups, and partner perks later.</Text>
           <PremiumButton label="Preview premium" icon="star-outline" onPress={() => setSheet('premium')} />
+        </View>
+      </CollapsibleSection>
+
+      <CollapsibleSection title="Club Pro & Perks" action="Future value loops">
+        <View style={styles.valueGrid}>
+          <View style={styles.valueCard}>
+            <MaterialCommunityIcons name="office-building-outline" size={21} color={colors.hotPink} />
+            <Text style={styles.valueTitle}>Club Pro</Text>
+            <Text style={styles.panelMeta}>Club profile, events, top players, traffic placeholders, and tournament tools.</Text>
+          </View>
+          <View style={styles.valueCard}>
+            <MaterialCommunityIcons name="ticket-percent-outline" size={21} color={colors.success} />
+            <Text style={styles.valueTitle}>Partner perks</Text>
+            <Text style={styles.panelMeta}>Simple Qatar-style offers and redemptions for premium retention later.</Text>
+          </View>
         </View>
       </CollapsibleSection>
 
@@ -374,10 +389,10 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.primary, paddingTop: 58, paddingBottom: 24, paddingHorizontal: spacing.md },
   avatarActions: { marginHorizontal: spacing.md, marginTop: -10 },
   headerLusail: { backgroundColor: '#3A001D', borderBottomWidth: 1, borderBottomColor: colors.hotPink },
-  headerElite: { shadowColor: colors.hotPink, shadowOpacity: 0.42, shadowRadius: 22, shadowOffset: { width: 0, height: 14 }, elevation: 10 },
+  headerElite: { shadowColor: colors.hotPink, shadowOpacity: 0.24, shadowRadius: 18, shadowOffset: { width: 0, height: 10 }, elevation: 7 },
   avatarShell: { padding: 3, borderRadius: 999, borderWidth: 1, borderColor: 'rgba(255,255,255,0.16)' },
   avatarPearl: { borderWidth: 3, borderColor: colors.pearl, shadowColor: colors.pearl, shadowOpacity: 0.26, shadowRadius: 12 },
-  avatarElite: { borderColor: colors.hotPink, shadowColor: colors.hotPink, shadowOpacity: 0.55, shadowRadius: 16 },
+  avatarElite: { borderColor: colors.hotPink, shadowColor: colors.hotPink, shadowOpacity: 0.28, shadowRadius: 12 },
   kicker: { color: '#F2DCE7', fontWeight: '900', textTransform: 'uppercase', fontSize: 12 },
   name: { color: '#FFFFFF', fontWeight: '900', fontSize: 30, marginTop: 5 },
   headerStats: { flexDirection: 'row', gap: 8, marginTop: 7, flexWrap: 'wrap' },
@@ -388,9 +403,9 @@ const styles = StyleSheet.create({
   statLabel: { color: colors.textSecondary, fontWeight: '800', marginTop: 4, fontSize: 12 },
   panel: { marginHorizontal: spacing.md, backgroundColor: colors.card, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, padding: 14, gap: 10 },
   cosmeticSurface: { borderColor: colors.hotPink, backgroundColor: '#321020' },
-  victoryGlow: { shadowColor: colors.hotPink, shadowOpacity: 0.35, shadowRadius: 18, shadowOffset: { width: 0, height: 12 }, elevation: 8 },
+  victoryGlow: { shadowColor: colors.hotPink, shadowOpacity: 0.2, shadowRadius: 14, shadowOffset: { width: 0, height: 8 }, elevation: 5 },
   equippedBar: { marginHorizontal: spacing.md, backgroundColor: colors.glass, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, padding: 14, gap: 6 },
-  cosmeticPreview: { marginHorizontal: spacing.md, flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#321020', borderRadius: radius.xl, borderWidth: 1, borderColor: colors.hotPink, padding: 14, shadowColor: colors.hotPink, shadowOpacity: 0.22, shadowRadius: 18, shadowOffset: { width: 0, height: 10 }, elevation: 7 },
+  cosmeticPreview: { marginHorizontal: spacing.md, flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#321020', borderRadius: radius.xl, borderWidth: 1, borderColor: colors.hotPink, padding: 14, shadowColor: colors.hotPink, shadowOpacity: 0.14, shadowRadius: 14, shadowOffset: { width: 0, height: 8 }, elevation: 5 },
   previewLusail: { backgroundColor: '#3A001D' },
   previewAvatar: { padding: 3, borderRadius: 999, borderWidth: 1, borderColor: colors.border },
   previewName: { color: colors.pearl, fontWeight: '900', fontSize: 18 },
@@ -417,6 +432,9 @@ const styles = StyleSheet.create({
   cosmeticCard: { backgroundColor: colors.card, borderRadius: radius.lg, padding: 12, borderWidth: 1, borderColor: colors.border, gap: 8 },
   cosmeticActive: { borderColor: colors.hotPink, backgroundColor: colors.softMaroon },
   cosmeticActions: { flexDirection: 'row', gap: 8 },
+  valueGrid: { marginHorizontal: spacing.md, gap: 10 },
+  valueCard: { backgroundColor: colors.card, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, padding: 14, gap: 8 },
+  valueTitle: { color: colors.pearl, fontWeight: '900', fontSize: 16 },
   input: { minHeight: 50, borderWidth: 1, borderColor: colors.border, borderRadius: radius.md, paddingHorizontal: 12, color: colors.textPrimary, fontWeight: '800', backgroundColor: colors.glass },
   tallInput: { minHeight: 86, paddingTop: 12 },
   tagRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },

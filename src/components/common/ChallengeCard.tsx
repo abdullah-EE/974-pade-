@@ -20,8 +20,8 @@ export function ChallengeCard({ challenge, opponent, court, onAccept, onDecline,
           {challenge.note ? <Text numberOfLines={1} style={styles.note}>{challenge.note}</Text> : null}
         </View>
         <View style={styles.statusStack}>
-          {challenge.privacy ? <Text style={styles.private}>{challenge.privacy}</Text> : null}
-          <Text style={styles.status}>{challenge.status}</Text>
+          {challenge.privacy ? <Text numberOfLines={1} style={styles.private}>{challenge.privacy}</Text> : null}
+          <Text numberOfLines={1} style={styles.status}>{challenge.status}</Text>
         </View>
       </View>
       {actionable ? (
@@ -40,9 +40,9 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   name: { color: colors.textPrimary, fontSize: 16, fontWeight: '900' },
   meta: { color: colors.textSecondary, fontWeight: '700', marginTop: 3 },
-  status: { overflow: 'hidden', backgroundColor: colors.softMaroon, color: colors.hotPink, borderRadius: radius.pill, paddingHorizontal: 9, paddingVertical: 5, fontWeight: '900', fontSize: 11 },
-  statusStack: { alignItems: 'flex-end', gap: 5 },
-  private: { overflow: 'hidden', backgroundColor: colors.darkSection, color: '#FFFFFF', borderRadius: radius.pill, paddingHorizontal: 8, paddingVertical: 4, fontWeight: '900', fontSize: 10 },
+  status: { maxWidth: 104, overflow: 'hidden', backgroundColor: colors.softMaroon, color: colors.hotPink, borderRadius: radius.pill, paddingHorizontal: 9, paddingVertical: 5, fontWeight: '900', fontSize: 11, textAlign: 'center' },
+  statusStack: { alignItems: 'flex-end', gap: 5, maxWidth: 112 },
+  private: { maxWidth: 112, overflow: 'hidden', backgroundColor: colors.darkSection, color: '#FFFFFF', borderRadius: radius.pill, paddingHorizontal: 8, paddingVertical: 4, fontWeight: '900', fontSize: 10, textAlign: 'center' },
   note: { color: colors.textPrimary, fontWeight: '800', marginTop: 5 },
   actions: { flexDirection: 'row', gap: 8 },
 });

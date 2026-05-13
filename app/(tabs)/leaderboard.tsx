@@ -4,6 +4,8 @@ import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { CollapsibleSection } from '@/components/common/CollapsibleSection';
 import { FilterChips } from '@/components/common/FilterChips';
 import { RankingPodium, RankingRow } from '@/components/common/Ranking';
+import { AnimatedNumber } from '@/components/common/AnimatedNumber';
+import { ProgressBar } from '@/components/common/ProgressBar';
 import { ScreenTransitionWrapper } from '@/components/common/ScreenTransitionWrapper';
 import { StaggeredList } from '@/components/common/StaggeredList';
 import { HorizontalCardRail } from '@/components/common/HorizontalCardRail';
@@ -35,6 +37,24 @@ export default function RankingsScreen() {
       <View>
         <Text style={styles.kicker}>Verified Qatar leaderboard</Text>
         <Text style={styles.title}>Rankings</Text>
+      </View>
+      <View style={styles.statusPanel}>
+        <View style={styles.statusMetric}>
+          <Text style={styles.statusLabel}>Your rank</Text>
+          <AnimatedNumber value={currentUser.rank} prefix="#" style={styles.statusValue} />
+        </View>
+        <View style={styles.statusMetric}>
+          <Text style={styles.statusLabel}>Rating</Text>
+          <AnimatedNumber value={currentUser.rating} style={styles.statusValue} />
+        </View>
+        <View style={styles.statusMetric}>
+          <Text style={styles.statusLabel}>Weekly points</Text>
+          <AnimatedNumber value={currentUser.weeklyPoints || 0} style={styles.statusValue} />
+        </View>
+        <View style={styles.statusProgress}>
+          <Text style={styles.statusHint}>Confirmed matches move rating. Pending or disputed results do not.</Text>
+          <ProgressBar value={Math.min(100, Math.max(8, ((currentUser.weeklyPoints || 0) / 500) * 100))} />
+        </View>
       </View>
       <CollapsibleSection title="Top 3 Podium" action="Verified leaders" defaultOpen>
         <RankingPodium players={players.slice(0, 3)} onOpen={(id) => router.push(`/player/${id}`)} />
@@ -82,4 +102,10 @@ const styles = StyleSheet.create({
   moverName: { color: '#FFFFFF', fontWeight: '900' },
   moverMeta: { color: '#F2DCE7', marginTop: 6, fontWeight: '800' },
   rows: { gap: 9 },
+  statusPanel: { backgroundColor: colors.card, borderRadius: radius.xl, borderWidth: 1, borderColor: colors.border, padding: 14, gap: 12 },
+  statusMetric: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
+  statusLabel: { color: colors.textSecondary, fontWeight: '800' },
+  statusValue: { color: colors.pearl, fontWeight: '900', fontSize: 22 },
+  statusProgress: { gap: 8 },
+  statusHint: { color: colors.textSecondary, fontWeight: '700', lineHeight: 18, fontSize: 12 },
 });
