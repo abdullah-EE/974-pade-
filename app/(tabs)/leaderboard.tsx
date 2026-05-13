@@ -7,6 +7,7 @@ import { RankingPodium, RankingRow } from '@/components/common/Ranking';
 import { HorizontalCardRail } from '@/components/common/HorizontalCardRail';
 import { useAppState } from '@/state/AppState';
 import { colors, radius, spacing } from '@/theme/tokens';
+import { centeredContent } from '@/theme/layout';
 
 const filters = ['Overall', 'This Week', 'Friends', 'Club', 'Beginner', 'Intermediate', 'Advanced'];
 
@@ -64,7 +65,7 @@ export default function RankingsScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.md, gap: 22, paddingBottom: 104 },
+  content: { ...centeredContent, padding: spacing.md, gap: 22, paddingBottom: 104 },
   kicker: { color: colors.primary, fontWeight: '900', textTransform: 'uppercase', fontSize: 12 },
   title: { color: colors.textPrimary, fontSize: 34, fontWeight: '900', marginTop: 3 },
   search: { minHeight: 50, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: colors.border, borderRadius: radius.pill, paddingHorizontal: 16, color: colors.textPrimary, fontWeight: '800' },

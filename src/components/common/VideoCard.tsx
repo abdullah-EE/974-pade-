@@ -1,12 +1,14 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { VideoPost } from '@/types/VideoPost';
 import { colors, radius, shadow } from '@/theme/tokens';
 import { ImageWithFallback } from './ImageWithFallback';
 
 export function VideoCard({ video, onOpen }: { video: VideoPost; onOpen: () => void }) {
+  const [hovered, setHovered] = useState(false);
   return (
-    <Pressable onPress={onOpen} style={({ pressed }) => [styles.card, pressed && styles.pressed]}>
+    <Pressable onHoverIn={() => setHovered(true)} onHoverOut={() => setHovered(false)} onPress={onOpen} style={({ pressed }) => [styles.card, hovered && !pressed && styles.hovered, pressed && styles.pressed]}>
       <ImageWithFallback uri={video.thumbnailUrl} style={styles.image} label={video.title} />
       <View style={styles.play}>
         <MaterialCommunityIcons name="play" size={22} color="#FFFFFF" />
@@ -24,7 +26,8 @@ export function VideoCard({ video, onOpen }: { video: VideoPost; onOpen: () => v
 }
 
 const styles = StyleSheet.create({
-  card: { width: 214, overflow: 'hidden', backgroundColor: '#FFFFFF', borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, ...shadow },
+  card: { width: 214, overflow: 'hidden', backgroundColor: '#FFFFFF', borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, ...shadow, cursor: 'pointer' } as any,
+  hovered: { transform: [{ translateY: -4 }, { scale: 1.018 }], shadowOpacity: 0.17, shadowRadius: 22, shadowOffset: { width: 0, height: 13 }, elevation: 8 },
   pressed: { transform: [{ scale: 0.982 }, { translateY: 1 }], shadowOpacity: 0.04 },
   image: { width: '100%', height: 148 },
   play: { position: 'absolute', top: 58, left: 82, width: 50, height: 50, borderRadius: 25, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(26,16,21,0.62)' },

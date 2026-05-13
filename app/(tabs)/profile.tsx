@@ -12,6 +12,7 @@ import { PremiumButton } from '@/components/common/PremiumButton';
 import { VideoCard } from '@/components/common/VideoCard';
 import { useAppState } from '@/state/AppState';
 import { colors, radius, spacing } from '@/theme/tokens';
+import { centeredContent } from '@/theme/layout';
 import { CosmeticItem } from '@/types/Wallet';
 import { Coach } from '@/types/Coach';
 import { VideoPost } from '@/types/VideoPost';
@@ -217,7 +218,7 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
-  content: { paddingBottom: 104, gap: 20 },
+  content: { ...centeredContent, paddingBottom: 104, gap: 20 },
   header: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.primary, paddingTop: 58, paddingBottom: 24, paddingHorizontal: spacing.md },
   kicker: { color: '#F2DCE7', fontWeight: '900', textTransform: 'uppercase', fontSize: 12 },
   name: { color: '#FFFFFF', fontWeight: '900', fontSize: 30, marginTop: 5 },

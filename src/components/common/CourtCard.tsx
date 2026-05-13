@@ -1,4 +1,5 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Court } from '@/types/models';
 import { colors, radius, shadow } from '@/theme/tokens';
@@ -7,8 +8,9 @@ import { PremiumButton } from './PremiumButton';
 import { TimeSlotChips } from './TimeSlotChips';
 
 export function CourtCard({ court, onOpen, onBook, onStartRanked, compact = false }: { court: Court; onOpen: () => void; onBook: () => void; onStartRanked: () => void; compact?: boolean }) {
+  const [hovered, setHovered] = useState(false);
   return (
-    <Pressable onPress={onOpen} style={({ pressed }) => [styles.card, compact && styles.compact, pressed && styles.pressed]}>
+    <Pressable onHoverIn={() => setHovered(true)} onHoverOut={() => setHovered(false)} onPress={onOpen} style={({ pressed }) => [styles.card, compact && styles.compact, hovered && !pressed && styles.hovered, pressed && styles.pressed]}>
       <View style={styles.media}>
         <ImageWithFallback uri={court.image} style={styles.image} label={court.name} />
         <View style={styles.photoShade} />
@@ -38,10 +40,11 @@ export function CourtCard({ court, onOpen, onBook, onStartRanked, compact = fals
 }
 
 const styles = StyleSheet.create({
-  card: { width: 318, backgroundColor: '#FFFFFF', borderRadius: radius.lg, overflow: 'hidden', borderWidth: 1, borderColor: colors.border, ...shadow },
+  card: { width: 318, backgroundColor: '#FFFFFF', borderRadius: radius.lg, overflow: 'hidden', borderWidth: 1, borderColor: colors.border, ...shadow, cursor: 'pointer' } as any,
   compact: { width: 292 },
+  hovered: { transform: [{ translateY: -5 }, { scale: 1.018 }], shadowOpacity: 0.17, shadowRadius: 24, shadowOffset: { width: 0, height: 14 }, elevation: 9 },
   pressed: { transform: [{ scale: 0.985 }, { translateY: 1 }], shadowOpacity: 0.04 },
-  media: { height: 172, width: '100%', overflow: 'hidden', backgroundColor: colors.deep },
+  media: { height: 184, width: '100%', overflow: 'hidden', backgroundColor: colors.deep },
   image: { height: '100%', width: '100%' },
   photoShade: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 72, backgroundColor: 'rgba(26,16,21,0.22)' },
   body: { padding: 12, gap: 10 },

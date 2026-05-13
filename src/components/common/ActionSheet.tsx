@@ -3,6 +3,7 @@ import { ReactNode } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { MotiView } from 'moti';
 import { colors, shadow, spacing } from '@/theme/tokens';
+import { centeredContent } from '@/theme/layout';
 
 export function ActionSheet({ visible, title, subtitle, children, onClose }: { visible: boolean; title: string; subtitle?: string; children: ReactNode; onClose: () => void }) {
   return (
@@ -28,7 +29,7 @@ export function ActionSheet({ visible, title, subtitle, children, onClose }: { v
 
 const styles = StyleSheet.create({
   backdrop: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(26,16,21,0.42)' },
-  sheet: { backgroundColor: colors.card, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: spacing.lg, gap: 14, ...shadow },
+  sheet: { ...centeredContent, backgroundColor: colors.card, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: spacing.lg, gap: 14, ...shadow },
   handle: { width: 44, height: 5, borderRadius: 999, backgroundColor: colors.border, alignSelf: 'center' },
   head: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
   title: { fontSize: 21, fontWeight: '900', color: colors.textPrimary },

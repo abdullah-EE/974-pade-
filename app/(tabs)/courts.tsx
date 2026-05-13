@@ -19,6 +19,7 @@ import { TimeSlotChips } from '@/components/common/TimeSlotChips';
 import { VideoCard } from '@/components/common/VideoCard';
 import { useAppState } from '@/state/AppState';
 import { colors, radius, spacing } from '@/theme/tokens';
+import { centeredContent } from '@/theme/layout';
 import { AvailabilitySlot, Court } from '@/types/models';
 import { Coach } from '@/types/Coach';
 import { VideoPost } from '@/types/VideoPost';
@@ -111,8 +112,8 @@ export default function PlayScreen() {
       <View style={styles.networkPanel}>
         <View style={{ flex: 1 }}>
           <Text style={styles.panelKicker}>Your Qatar ladder</Text>
-          <Text style={styles.panelTitle}>#{currentUser.rank} · {currentUser.rating} rating</Text>
-          <Text style={styles.panelCopy}>{currentUser.streak} match streak · {winRate(currentUser.wins, currentUser.losses)}% win rate · {friendIds.length} friends ready</Text>
+          <Text style={styles.panelTitle}>#{currentUser.rank} - {currentUser.rating} rating</Text>
+          <Text style={styles.panelCopy}>{currentUser.streak} match streak - {winRate(currentUser.wins, currentUser.losses)}% win rate - {friendIds.length} friends ready</Text>
         </View>
         <View style={styles.wallet}>
           <Text style={styles.walletValue}>{friendIds.length}</Text>
@@ -247,7 +248,7 @@ export default function PlayScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.md, gap: 24, paddingBottom: 104 },
+  content: { ...centeredContent, padding: spacing.md, gap: 24, paddingBottom: 104 },
   horizontal: { gap: 12, paddingRight: spacing.md },
   stack: { gap: 14 },
   quickGrid: { flexDirection: 'row', gap: 10 },

@@ -1,4 +1,5 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useState } from 'react';
 import { Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { colors, radius, spacing } from '@/theme/tokens';
 
@@ -17,9 +18,15 @@ export function PremiumButton({
   icon?: keyof typeof MaterialCommunityIcons.glyphMap;
   style?: StyleProp<ViewStyle>;
 }) {
+  const [hovered, setHovered] = useState(false);
   const dark = variant === 'primary' || variant === 'danger';
   return (
-    <Pressable onPress={onPress} style={({ pressed }) => [styles.base, styles[variant], style, pressed && styles.pressed]}>
+    <Pressable
+      onHoverIn={() => setHovered(true)}
+      onHoverOut={() => setHovered(false)}
+      onPress={onPress}
+      style={({ pressed }) => [styles.base, styles[variant], hovered && !pressed && styles.hovered, style, pressed && styles.pressed]}
+    >
       <View pointerEvents="none" style={[styles.highlight, !dark && styles.highlightLight]} />
       <View style={styles.inner}>
         {icon ? <MaterialCommunityIcons name={icon} size={17} color={dark ? '#FFFFFF' : colors.primary} /> : null}
@@ -30,7 +37,7 @@ export function PremiumButton({
 }
 
 const styles = StyleSheet.create({
-  base: { minHeight: 46, paddingVertical: spacing.sm, paddingHorizontal: spacing.md, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center', overflow: 'hidden', shadowColor: '#2A1621', shadowOpacity: 0.18, shadowRadius: 14, shadowOffset: { width: 0, height: 8 }, elevation: 5, borderBottomWidth: 3, borderBottomColor: 'rgba(0,0,0,0.16)' },
+  base: { minHeight: 46, paddingVertical: spacing.sm, paddingHorizontal: spacing.md, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center', overflow: 'hidden', shadowColor: '#2A1621', shadowOpacity: 0.18, shadowRadius: 14, shadowOffset: { width: 0, height: 8 }, elevation: 5, borderBottomWidth: 3, borderBottomColor: 'rgba(0,0,0,0.16)', cursor: 'pointer' } as ViewStyle,
   primary: { backgroundColor: colors.primary },
   secondary: { backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: colors.primary, borderBottomColor: 'rgba(102,0,51,0.20)' },
   subtle: { backgroundColor: colors.softMaroon, borderBottomColor: 'rgba(102,0,51,0.12)' },
@@ -40,5 +47,6 @@ const styles = StyleSheet.create({
   inner: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7 },
   text: { color: '#FFFFFF', fontWeight: '800', fontSize: 13 },
   textAlt: { color: colors.primary },
+  hovered: { transform: [{ translateY: -3 }, { scale: 1.025 }], shadowOpacity: 0.26, shadowRadius: 22, shadowOffset: { width: 0, height: 14 }, elevation: 8, borderBottomWidth: 5 },
   pressed: { opacity: 0.94, transform: [{ scale: 0.965 }, { translateY: 2 }], shadowOpacity: 0.05, elevation: 1, borderBottomWidth: 1 },
 });

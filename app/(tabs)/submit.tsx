@@ -11,6 +11,7 @@ import { PlayerAvatar } from '@/components/common/PlayerAvatar';
 import { PremiumButton } from '@/components/common/PremiumButton';
 import { useAppState } from '@/state/AppState';
 import { colors, radius, spacing } from '@/theme/tokens';
+import { centeredContent } from '@/theme/layout';
 import { Match } from '@/types/models';
 
 const steps = ['Court', 'Players', 'Score', 'Proof + Review'];
@@ -196,7 +197,7 @@ export default function SubmitScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.md, gap: 20, paddingBottom: 104 },
+  content: { ...centeredContent, padding: spacing.md, gap: 20, paddingBottom: 104 },
   kicker: { color: colors.primary, fontWeight: '900', textTransform: 'uppercase', fontSize: 12 },
   title: { color: colors.textPrimary, fontSize: 34, fontWeight: '900', marginTop: 3 },
   progress: { flexDirection: 'row', gap: 8 },

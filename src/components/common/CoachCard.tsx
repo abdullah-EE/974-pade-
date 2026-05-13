@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Coach } from '@/types/Coach';
 import { colors, radius, shadow } from '@/theme/tokens';
@@ -5,8 +6,9 @@ import { ImageWithFallback } from './ImageWithFallback';
 import { PremiumButton } from './PremiumButton';
 
 export function CoachCard({ coach, onOpen, onRequest }: { coach: Coach; onOpen: () => void; onRequest: () => void }) {
+  const [hovered, setHovered] = useState(false);
   return (
-    <Pressable onPress={onOpen} style={({ pressed }) => [styles.card, pressed && styles.pressed]}>
+    <Pressable onHoverIn={() => setHovered(true)} onHoverOut={() => setHovered(false)} onPress={onOpen} style={({ pressed }) => [styles.card, hovered && !pressed && styles.hovered, pressed && styles.pressed]}>
       <ImageWithFallback uri={coach.heroImageUrl} style={styles.image} label={coach.name} />
       <View style={styles.body}>
         <Text numberOfLines={1} style={styles.name}>{coach.name}</Text>
@@ -22,7 +24,8 @@ export function CoachCard({ coach, onOpen, onRequest }: { coach: Coach; onOpen: 
 }
 
 const styles = StyleSheet.create({
-  card: { width: 238, overflow: 'hidden', backgroundColor: '#FFFFFF', borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, ...shadow },
+  card: { width: 238, overflow: 'hidden', backgroundColor: '#FFFFFF', borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, ...shadow, cursor: 'pointer' } as any,
+  hovered: { transform: [{ translateY: -4 }, { scale: 1.018 }], shadowOpacity: 0.17, shadowRadius: 22, shadowOffset: { width: 0, height: 13 }, elevation: 8 },
   pressed: { transform: [{ scale: 0.982 }, { translateY: 1 }], shadowOpacity: 0.04 },
   image: { width: '100%', height: 132 },
   body: { padding: 12, gap: 7 },

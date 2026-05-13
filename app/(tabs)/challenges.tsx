@@ -9,6 +9,7 @@ import { OpenGameCard } from '@/components/common/OpenGameCard';
 import { PremiumButton } from '@/components/common/PremiumButton';
 import { useAppState } from '@/state/AppState';
 import { colors, radius, spacing } from '@/theme/tokens';
+import { centeredContent } from '@/theme/layout';
 import { Challenge, Level } from '@/types/models';
 
 const levels: Level[] = ['Beginner', 'Intermediate', 'Advanced'];
@@ -181,7 +182,7 @@ export default function ChallengesScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.md, gap: 22, paddingBottom: 104 },
+  content: { ...centeredContent, padding: spacing.md, gap: 22, paddingBottom: 104 },
   header: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   kicker: { color: colors.primary, fontWeight: '900', textTransform: 'uppercase', fontSize: 12 },
   title: { color: colors.textPrimary, fontSize: 34, fontWeight: '900', marginTop: 3 },
