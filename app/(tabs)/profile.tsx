@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { ActionSheet } from '@/components/common/ActionSheet';
 import { AnimatedNumber } from '@/components/common/AnimatedNumber';
@@ -19,19 +20,65 @@ import { colors, radius, spacing } from '@/theme/tokens';
 import { centeredContent } from '@/theme/layout';
 import { CosmeticItem } from '@/types/Wallet';
 import { Coach } from '@/types/Coach';
-import { VideoPost } from '@/types/VideoPost';
+import { VideoPost, VideoTag } from '@/types/VideoPost';
 import { formatPlayerStatus, winRate } from '@/utils/format';
 
 export default function ProfileScreen() {
-  const { currentUser: me, players, courts, matches, challenges, friendIds, coaches, videos, wallet, cosmetics, activeCosmeticIds, updateMatchStatus, updateChallenge, requestCoachSession, previewCosmetic, selectCosmetic, buyCosmetic, toggleVideoLike, toggleVideoSave } = useAppState();
-  const [sheet, setSheet] = useState<'edit' | 'settings' | 'premium' | null>(null);
+  const { currentUser: me, players, courts, matches, challenges, friendIds, coaches, videos, wallet, cosmetics, activeCosmeticIds, updateMatchStatus, updateChallenge, requestCoachSession, previewCosmetic, selectCosmetic, buyCosmetic, toggleVideoLike, toggleVideoSave, createCoachProfile, uploadVideo } = useAppState();
+  const [sheet, setSheet] = useState<'edit' | 'settings' | 'premium' | 'coachSignup' | 'videoUpload' | null>(null);
   const [coachSheet, setCoachSheet] = useState<Coach | null>(null);
   const [videoSheet, setVideoSheet] = useState<VideoPost | null>(null);
   const [cosmeticSheet, setCosmeticSheet] = useState<CosmeticItem | null>(null);
   const [friendSearch, setFriendSearch] = useState('');
+  const [coachSpecialty, setCoachSpecialty] = useState('Bandeja and wall defense');
+  const [coachPrice, setCoachPrice] = useState('QAR 180/session');
+  const [coachBio, setCoachBio] = useState('Available for private ranked-match preparation sessions.');
+  const [videoTitle, setVideoTitle] = useState('My latest ranked point');
+  const [videoDescription, setVideoDescription] = useState('A local match clip uploaded for the 974 Padel community.');
+  const [videoTag, setVideoTag] = useState<VideoTag>('Highlight');
+  const [videoThumb, setVideoThumb] = useState<string | undefined>();
+  const [uploadMessage, setUploadMessage] = useState('');
   const myChallenges = challenges.filter((challenge) => challenge.from === me.id || challenge.to === me.id);
   const progress = Math.min(100, Math.round(((me.rating - 1800) / 500) * 100));
   const favoriteCourt = courts.find((court) => court.id === me.favoriteCourtId) || courts[0];
+  const localCoach = coaches.find((coach) => coach.id.startsWith('coach-local'));
+
+  const submitCoachSignup = () => {
+    createCoachProfile({
+      name: me.name,
+      avatarUrl: me.avatar,
+      heroImageUrl: favoriteCourt.image as string,
+      specialty: coachSpecialty,
+      level: me.level,
+      area: me.area || favoriteCourt.area,
+      courtId: favoriteCourt.id,
+      priceLabel: coachPrice,
+      bio: coachBio,
+      specialties: coachSpecialty.split(',').map((item) => item.trim()).filter(Boolean),
+      availableSlots: ['Tonight, 8:00 PM', 'Tomorrow, 7:30 PM', 'Saturday, 10:00 AM'],
+    });
+    setSheet(null);
+  };
+
+  const pickVideoThumb = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.8 });
+    if (!result.canceled) {
+      setVideoThumb(result.assets[0].uri);
+      setUploadMessage('Thumbnail attached locally.');
+    }
+  };
+
+  const submitVideoUpload = () => {
+    uploadVideo({
+      title: videoTitle,
+      description: videoDescription,
+      thumbnailUrl: videoThumb || (favoriteCourt.image as string),
+      duration: '0:30',
+      tag: videoTag,
+    });
+    setUploadMessage('Clip uploaded locally. +40 credits earned.');
+    setSheet(null);
+  };
 
   return (
     <ScreenTransitionWrapper>
@@ -134,7 +181,10 @@ export default function ProfileScreen() {
         </View>
       </CollapsibleSection>
 
-      <CollapsibleSection title="Coaching" action="Requested sessions">
+      <CollapsibleSection title="Coaching" action={localCoach ? 'Coach profile active' : 'Become a coach'}>
+        <View style={styles.stack}>
+          <PremiumButton label={localCoach ? 'Edit coach profile' : 'Sign up as coach'} icon="whistle-outline" onPress={() => setSheet('coachSignup')} />
+        </View>
         <HorizontalCardRail>
           {coaches.map((coach) => (
             <CoachCard key={coach.id} coach={coach} onOpen={() => setCoachSheet(coach)} onRequest={() => requestCoachSession(coach.id, coach.availableSlots[0] || 'Next available')} />
@@ -142,7 +192,10 @@ export default function ProfileScreen() {
         </HorizontalCardRail>
       </CollapsibleSection>
 
-      <CollapsibleSection title="Videos" action="Your clips and saves">
+      <CollapsibleSection title="Videos" action="Upload and save clips">
+        <View style={styles.stack}>
+          <PremiumButton label="Upload local clip" icon="video-plus-outline" onPress={() => setSheet('videoUpload')} />
+        </View>
         <HorizontalCardRail>
           {videos.map((video) => (
             <VideoCard key={video.id} video={video} onOpen={() => setVideoSheet(video)} />
@@ -208,6 +261,32 @@ export default function ProfileScreen() {
       </ActionSheet>
       <ActionSheet visible={sheet === 'premium'} title="Premium preview" subtitle="Payments and subscriptions are intentionally inactive in this frontend MVP." onClose={() => setSheet(null)}>
         <PremiumButton label="Close" icon="check" onPress={() => setSheet(null)} />
+      </ActionSheet>
+      <ActionSheet visible={sheet === 'coachSignup'} title="Coach signup" subtitle="Create a local coach profile now. Backend verification comes next." onClose={() => setSheet(null)}>
+        <Text style={styles.panelMeta}>Specialty</Text>
+        <TextInput value={coachSpecialty} onChangeText={setCoachSpecialty} placeholder="Specialty" placeholderTextColor={colors.textSecondary} style={styles.input} />
+        <Text style={styles.panelMeta}>Price</Text>
+        <TextInput value={coachPrice} onChangeText={setCoachPrice} placeholder="QAR 180/session" placeholderTextColor={colors.textSecondary} style={styles.input} />
+        <Text style={styles.panelMeta}>Bio</Text>
+        <TextInput value={coachBio} onChangeText={setCoachBio} placeholder="Coach bio" placeholderTextColor={colors.textSecondary} multiline style={[styles.input, styles.tallInput]} />
+        <View style={styles.cosmeticActions}>
+          <PremiumButton label="Cancel" variant="subtle" icon="close" onPress={() => setSheet(null)} style={{ flex: 1 }} />
+          <PremiumButton label="Create coach profile" icon="check" onPress={submitCoachSignup} style={{ flex: 1 }} />
+        </View>
+      </ActionSheet>
+      <ActionSheet visible={sheet === 'videoUpload'} title="Upload clip" subtitle="Local upload prototype. Real storage/backend comes next." onClose={() => setSheet(null)}>
+        <TextInput value={videoTitle} onChangeText={setVideoTitle} placeholder="Clip title" placeholderTextColor={colors.textSecondary} style={styles.input} />
+        <TextInput value={videoDescription} onChangeText={setVideoDescription} placeholder="Description" placeholderTextColor={colors.textSecondary} multiline style={[styles.input, styles.tallInput]} />
+        <View style={styles.tagRow}>
+          {(['Match', 'Training', 'Tip', 'Highlight'] as VideoTag[]).map((tag) => (
+            <PremiumButton key={tag} label={tag} variant={videoTag === tag ? 'primary' : 'subtle'} onPress={() => setVideoTag(tag)} style={{ flex: 1 }} />
+          ))}
+        </View>
+        <Text style={styles.panelMeta}>{uploadMessage || 'Attach a thumbnail or use your favorite court image.'}</Text>
+        <View style={styles.cosmeticActions}>
+          <PremiumButton label="Thumbnail" variant="secondary" icon="image-outline" onPress={pickVideoThumb} style={{ flex: 1 }} />
+          <PremiumButton label="Upload" icon="upload-outline" onPress={submitVideoUpload} style={{ flex: 1 }} />
+        </View>
       </ActionSheet>
       <ActionSheet visible={!!coachSheet} title={coachSheet?.name || 'Coach'} subtitle={coachSheet?.specialty} onClose={() => setCoachSheet(null)}>
         {coachSheet ? (
@@ -276,4 +355,7 @@ const styles = StyleSheet.create({
   cosmeticCard: { backgroundColor: colors.card, borderRadius: radius.lg, padding: 12, borderWidth: 1, borderColor: colors.border, gap: 8 },
   cosmeticActive: { borderColor: colors.hotPink, backgroundColor: colors.softMaroon },
   cosmeticActions: { flexDirection: 'row', gap: 8 },
+  input: { minHeight: 50, borderWidth: 1, borderColor: colors.border, borderRadius: radius.md, paddingHorizontal: 12, color: colors.textPrimary, fontWeight: '800', backgroundColor: colors.glass },
+  tallInput: { minHeight: 86, paddingTop: 12 },
+  tagRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
 });

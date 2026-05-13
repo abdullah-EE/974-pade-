@@ -90,11 +90,10 @@ export default function PlayScreen() {
     <ScreenTransitionWrapper>
     <ScrollView style={styles.screen} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <HeroCarousel courts={courts} />
-      <CollapsibleSection title="Quick Actions" action="Challenge, train, submit, watch" defaultOpen>
+      <CollapsibleSection title="Quick Actions" action="Challenge, players, coaches, clips" defaultOpen>
         <View style={styles.quickGrid}>
           <FloatingActionCard dark title="Create Challenge" meta="Private or public" icon="sword-cross" onPress={() => router.push('/(tabs)/challenges')} />
           <FloatingActionCard title="Find Players" meta="Search rivals" icon="account-search-outline" onPress={() => setMode('Players')} />
-          <FloatingActionCard title="Submit Match" meta="Proof + confirm" icon="clipboard-check-outline" onPress={() => router.push('/(tabs)/submit')} />
         </View>
         <View style={styles.quickGrid}>
           <FloatingActionCard title="Find Coach" meta="Book locally" icon="whistle-outline" onPress={() => setMode('Coaches')} />

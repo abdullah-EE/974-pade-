@@ -107,3 +107,27 @@ create table user_cosmetics (
   unlocked_at timestamptz not null default now(),
   primary key (user_id, cosmetic_id)
 );
+
+create table coach_profiles (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references profiles(id) on delete cascade,
+  specialty text not null,
+  price_label text not null,
+  bio text,
+  court_id text references courts(id),
+  verified boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
+create table video_posts (
+  id uuid primary key default gen_random_uuid(),
+  creator_id uuid references profiles(id) on delete cascade,
+  title text not null,
+  description text,
+  thumbnail_url text,
+  video_url text,
+  tag text not null,
+  duration text,
+  views integer not null default 0,
+  created_at timestamptz not null default now()
+);

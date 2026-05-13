@@ -49,6 +49,8 @@ interface AppStateValue {
   selectCosmetic: (id: string) => void;
   buyCosmetic: (id: string) => boolean;
   earnCredits: (amount: number, reason: Wallet['transactions'][number]['reason']) => void;
+  createCoachProfile: (input: Omit<Coach, 'id' | 'rating' | 'requested'>) => Coach;
+  uploadVideo: (input: Omit<VideoPost, 'id' | 'creatorId' | 'creatorName' | 'views' | 'createdAt'>) => VideoPost;
 }
 
 const AppStateContext = createContext<AppStateValue | null>(null);
@@ -245,8 +247,31 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       transactions: [{ id: `tx-${Date.now()}`, userId: currentUser.id, amount, reason, createdAt: new Date().toISOString() }, ...next.transactions],
     }));
   };
+  const createCoachProfile = (input: Omit<Coach, 'id' | 'rating' | 'requested'>) => {
+    const coach: Coach = {
+      ...input,
+      id: `coach-local-${Date.now()}`,
+      rating: 5,
+      requested: false,
+    };
+    setCoaches((items) => [coach, ...items]);
+    return coach;
+  };
+  const uploadVideo = (input: Omit<VideoPost, 'id' | 'creatorId' | 'creatorName' | 'views' | 'createdAt'>) => {
+    const video: VideoPost = {
+      ...input,
+      id: `video-local-${Date.now()}`,
+      creatorId: currentUser.id,
+      creatorName: currentUser.name,
+      views: 0,
+      createdAt: new Date().toISOString(),
+    };
+    setVideos((items) => [video, ...items]);
+    earnCredits(40, 'clipUploaded');
+    return video;
+  };
 
-  const value = { account, currentUser, players, courts, openGames, challenges, matches, coaches, videos, wallet, cosmetics, activeCosmeticIds, friendIds, createAccount, addFriend, removeFriend, joinOpenGame, createChallenge, updateChallenge, addMatch, updateMatchStatus, requestCoachSession, toggleVideoLike, toggleVideoSave, previewCosmetic, selectCosmetic, buyCosmetic, earnCredits };
+  const value = { account, currentUser, players, courts, openGames, challenges, matches, coaches, videos, wallet, cosmetics, activeCosmeticIds, friendIds, createAccount, addFriend, removeFriend, joinOpenGame, createChallenge, updateChallenge, addMatch, updateMatchStatus, requestCoachSession, toggleVideoLike, toggleVideoSave, previewCosmetic, selectCosmetic, buyCosmetic, earnCredits, createCoachProfile, uploadVideo };
 
   return <AppStateContext.Provider value={value}>{hydrated ? children : null}</AppStateContext.Provider>;
 }

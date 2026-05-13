@@ -98,6 +98,7 @@ export default function ChallengesScreen() {
         <View style={styles.stepDots}>
           {[0, 1, 2, 3].map((item) => <View key={item} style={[styles.stepDot, item <= challengeStep && styles.stepDotActive]} />)}
         </View>
+        <PremiumButton label="Cancel challenge setup" variant="subtle" icon="close" onPress={() => setSheet(false)} />
         {challengeStep === 0 ? (
           <>
             <Text style={styles.sheetLabel}>Court</Text>
