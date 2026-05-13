@@ -6,11 +6,14 @@ import { ActionSheet } from '@/components/common/ActionSheet';
 import { MatchCard } from '@/components/common/MatchCard';
 import { PlayerAvatar } from '@/components/common/PlayerAvatar';
 import { PremiumButton } from '@/components/common/PremiumButton';
+import { AnimatedNumber } from '@/components/common/AnimatedNumber';
+import { ScreenTransitionWrapper } from '@/components/common/ScreenTransitionWrapper';
 import { SectionHeader } from '@/components/common/SectionHeader';
 import { VerificationBadge } from '@/components/common/VerificationBadge';
 import { useAppState } from '@/state/AppState';
 import { colors, radius, spacing } from '@/theme/tokens';
-import { winRate } from '@/utils/format';
+import { centeredContent } from '@/theme/layout';
+import { formatPlayerStatus, winRate } from '@/utils/format';
 
 export default function PlayerDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -23,6 +26,7 @@ export default function PlayerDetail() {
   const isSelf = player.id === currentUser.id;
 
   return (
+    <ScreenTransitionWrapper>
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} style={({ pressed }) => [styles.back, pressed && styles.backPressed]}>
@@ -31,7 +35,7 @@ export default function PlayerDetail() {
         <PlayerAvatar name={player.name} uri={player.avatar} size={96} />
         <Text style={styles.name}>{player.name}</Text>
         <Text style={styles.username}>{player.username}</Text>
-        <Text style={styles.username}>{player.status === 'playingTonight' ? 'Playing tonight' : player.status || 'recently active'} - {player.club}</Text>
+        <Text numberOfLines={1} style={styles.username}>{formatPlayerStatus(player.status)} - {player.club}</Text>
         <View style={styles.badges}>
           {player.verified ? <VerificationBadge /> : null}
           <VerificationBadge label="Top 100" />
@@ -40,9 +44,9 @@ export default function PlayerDetail() {
       </View>
 
       <View style={styles.stats}>
-        <View style={styles.stat}><Text style={styles.statValue}>#{player.rank}</Text><Text style={styles.statLabel}>Qatar rank</Text></View>
-        <View style={styles.stat}><Text style={styles.statValue}>{player.rating}</Text><Text style={styles.statLabel}>Rating</Text></View>
-        <View style={styles.stat}><Text style={styles.statValue}>{winRate(player.wins, player.losses)}%</Text><Text style={styles.statLabel}>Win rate</Text></View>
+        <View style={styles.stat}><AnimatedNumber value={player.rank} prefix="#" style={styles.statValue} /><Text style={styles.statLabel}>Qatar rank</Text></View>
+        <View style={styles.stat}><AnimatedNumber value={player.rating} style={styles.statValue} /><Text style={styles.statLabel}>Rating</Text></View>
+        <View style={styles.stat}><AnimatedNumber value={winRate(player.wins, player.losses)} suffix="%" style={styles.statValue} /><Text style={styles.statLabel}>Win rate</Text></View>
       </View>
 
       <View style={styles.info}>
@@ -86,12 +90,13 @@ export default function PlayerDetail() {
         </View>
       </ActionSheet>
     </ScrollView>
+    </ScreenTransitionWrapper>
   );
 }
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
-  content: { paddingBottom: 42, gap: 20 },
+  content: { ...centeredContent, paddingBottom: 42, gap: 20 },
   header: { alignItems: 'center', backgroundColor: colors.primary, paddingTop: 58, paddingBottom: 24, paddingHorizontal: spacing.md },
   back: { position: 'absolute', top: 52, left: 14, width: 42, height: 42, borderRadius: 21, backgroundColor: 'rgba(255,255,255,0.18)', alignItems: 'center', justifyContent: 'center' },
   backPressed: { transform: [{ scale: 0.92 }] },
@@ -99,10 +104,10 @@ const styles = StyleSheet.create({
   username: { marginTop: 4, color: '#F2DCE7', fontWeight: '800' },
   badges: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center', marginTop: 14 },
   stats: { marginHorizontal: spacing.md, flexDirection: 'row', gap: 10 },
-  stat: { flex: 1, backgroundColor: '#FFFFFF', borderRadius: radius.lg, padding: 14, borderWidth: 1, borderColor: colors.border },
+  stat: { flex: 1, backgroundColor: colors.card, borderRadius: radius.lg, padding: 14, borderWidth: 1, borderColor: colors.border },
   statValue: { color: colors.textPrimary, fontWeight: '900', fontSize: 22 },
   statLabel: { color: colors.textSecondary, fontWeight: '800', marginTop: 4, fontSize: 12 },
-  info: { marginHorizontal: spacing.md, backgroundColor: '#FFFFFF', borderRadius: radius.lg, padding: 14, borderWidth: 1, borderColor: colors.border, gap: 8 },
+  info: { marginHorizontal: spacing.md, backgroundColor: colors.card, borderRadius: radius.lg, padding: 14, borderWidth: 1, borderColor: colors.border, gap: 8 },
   infoText: { color: colors.textPrimary, fontWeight: '800' },
   actions: { marginHorizontal: spacing.md, flexDirection: 'row', gap: 10 },
   stack: { marginHorizontal: spacing.md, gap: 10 },

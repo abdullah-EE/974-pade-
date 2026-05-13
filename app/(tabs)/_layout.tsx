@@ -15,22 +15,22 @@ export default function TabsLayout() {
       initialRouteName="courts"
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: '#8F868B',
+        tabBarActiveTintColor: colors.hotPink,
+        tabBarInactiveTintColor: colors.muted,
         tabBarLabelStyle: { fontSize: 11, fontWeight: '800', marginTop: 2 },
         tabBarStyle: {
-          backgroundColor: 'rgba(255,253,251,0.94)',
-          borderTopColor: '#EFE5E9',
+          backgroundColor: 'rgba(22,7,14,0.94)',
+          borderTopColor: colors.border,
           height: 76,
           paddingBottom: 12,
           paddingTop: 8,
-          shadowColor: '#2A1621',
-          shadowOpacity: 0.12,
+          shadowColor: '#000000',
+          shadowOpacity: 0.28,
           shadowRadius: 16,
           shadowOffset: { width: 0, height: -6 },
           elevation: 12,
         },
-        tabBarBackground: () => <BlurView tint="light" intensity={72} style={StyleSheet.absoluteFill} />,
+        tabBarBackground: () => <BlurView tint="dark" intensity={72} style={StyleSheet.absoluteFill} />,
       }}
     >
       <Tabs.Screen name="courts" options={{ title: 'Play', tabBarIcon: icon('stadium') }} />

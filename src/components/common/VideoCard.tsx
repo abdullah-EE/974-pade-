@@ -26,14 +26,14 @@ export function VideoCard({ video, onOpen }: { video: VideoPost; onOpen: () => v
 }
 
 const styles = StyleSheet.create({
-  card: { width: 214, overflow: 'hidden', backgroundColor: '#FFFFFF', borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, ...shadow, cursor: 'pointer' } as any,
+  card: { width: 214, overflow: 'hidden', backgroundColor: colors.card, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, ...shadow, cursor: 'pointer' } as any,
   hovered: { transform: [{ translateY: -4 }, { scale: 1.018 }], shadowOpacity: 0.17, shadowRadius: 22, shadowOffset: { width: 0, height: 13 }, elevation: 8 },
   pressed: { transform: [{ scale: 0.982 }, { translateY: 1 }], shadowOpacity: 0.04 },
   image: { width: '100%', height: 148 },
-  play: { position: 'absolute', top: 58, left: 82, width: 50, height: 50, borderRadius: 25, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(26,16,21,0.62)' },
+  play: { position: 'absolute', top: 58, left: 82, width: 50, height: 50, borderRadius: 25, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(22,7,14,0.72)', borderWidth: 1, borderColor: 'rgba(255,111,155,0.3)' },
   body: { padding: 12, gap: 7 },
   badgeRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
-  badge: { overflow: 'hidden', color: colors.primary, backgroundColor: colors.softMaroon, borderRadius: radius.pill, paddingHorizontal: 9, paddingVertical: 5, fontWeight: '900', fontSize: 11 },
+  badge: { overflow: 'hidden', color: colors.pearl, backgroundColor: colors.softMaroon, borderRadius: radius.pill, paddingHorizontal: 9, paddingVertical: 5, fontWeight: '900', fontSize: 11 },
   duration: { color: colors.textSecondary, fontWeight: '900', fontSize: 11 },
   title: { minHeight: 39, color: colors.textPrimary, fontWeight: '900', fontSize: 15 },
   meta: { color: colors.textSecondary, fontWeight: '800', fontSize: 12 },

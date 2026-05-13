@@ -7,10 +7,10 @@ import { LinearGradient } from 'expo-linear-gradient';
 export function ImageWithFallback({ uri, style, label = '974 Padel' }: { uri?: ImageSourcePropType | string; style: StyleProp<ImageStyle>; label?: string }) {
   const [failed, setFailed] = useState(false);
   const palettes = [
-    ['#1A1015', '#365B4A', '#F7F3F0'],
-    ['#2B1821', '#0F6B4D', '#F2E6EC'],
-    ['#171014', '#623244', '#DCEFE8'],
-    ['#3A001D', '#7A5163', '#F7F3F0'],
+    ['#16070E', '#660033', '#FF6F9B'],
+    ['#240B16', '#8A1E4D', '#FFF7F2'],
+    ['#16070E', '#D45578', '#7DE2A8'],
+    ['#3A001D', '#D45578', '#FFB86B'],
   ] as const;
   const palette = palettes[label.length % palettes.length];
 
@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
   netLine: { position: 'absolute', top: '50%', left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,255,255,0.32)' },
   serviceLine: { position: 'absolute', top: 0, bottom: 0, left: '50%', width: 1, backgroundColor: 'rgba(255,255,255,0.22)' },
   backGlass: { position: 'absolute', left: 0, right: 0, top: '27%', height: 1, backgroundColor: 'rgba(255,255,255,0.22)' },
-  floorGlow: { position: 'absolute', left: -20, right: -20, bottom: -18, height: 82, backgroundColor: 'rgba(15,107,77,0.34)', borderRadius: 80 },
+  floorGlow: { position: 'absolute', left: -20, right: -20, bottom: -18, height: 82, backgroundColor: 'rgba(255,111,155,0.24)', borderRadius: 80 },
   icon: { width: 54, height: 54, borderRadius: 27, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.16)', marginBottom: 10, borderWidth: 1, borderColor: 'rgba(255,255,255,0.20)' },
   text: { color: '#FFFFFF', fontWeight: '900', textAlign: 'center', textShadowColor: 'rgba(0,0,0,0.28)', textShadowRadius: 8 },
 });

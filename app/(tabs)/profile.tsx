@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { ActionSheet } from '@/components/common/ActionSheet';
+import { AnimatedNumber } from '@/components/common/AnimatedNumber';
 import { ChallengeCard } from '@/components/common/ChallengeCard';
 import { CoachCard } from '@/components/common/CoachCard';
 import { CollapsibleSection } from '@/components/common/CollapsibleSection';
@@ -9,6 +10,9 @@ import { HorizontalCardRail } from '@/components/common/HorizontalCardRail';
 import { MatchCard } from '@/components/common/MatchCard';
 import { PlayerAvatar } from '@/components/common/PlayerAvatar';
 import { PremiumButton } from '@/components/common/PremiumButton';
+import { ProgressBar } from '@/components/common/ProgressBar';
+import { ScreenTransitionWrapper } from '@/components/common/ScreenTransitionWrapper';
+import { StreakBar } from '@/components/common/StreakBar';
 import { VideoCard } from '@/components/common/VideoCard';
 import { useAppState } from '@/state/AppState';
 import { colors, radius, spacing } from '@/theme/tokens';
@@ -16,7 +20,7 @@ import { centeredContent } from '@/theme/layout';
 import { CosmeticItem } from '@/types/Wallet';
 import { Coach } from '@/types/Coach';
 import { VideoPost } from '@/types/VideoPost';
-import { winRate } from '@/utils/format';
+import { formatPlayerStatus, winRate } from '@/utils/format';
 
 export default function ProfileScreen() {
   const { currentUser: me, players, courts, matches, challenges, friendIds, coaches, videos, wallet, cosmetics, activeCosmeticIds, updateMatchStatus, updateChallenge, requestCoachSession, previewCosmetic, selectCosmetic, toggleVideoLike, toggleVideoSave } = useAppState();
@@ -30,20 +34,24 @@ export default function ProfileScreen() {
   const favoriteCourt = courts.find((court) => court.id === me.favoriteCourtId) || courts[0];
 
   return (
+    <ScreenTransitionWrapper>
     <ScrollView style={styles.screen} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <View style={styles.header}>
         <View style={{ flex: 1 }}>
           <Text style={styles.kicker}>My 974 profile</Text>
           <Text style={styles.name}>{me.name}</Text>
-          <Text style={styles.sub}>Rank #{me.rank} - Rating {me.rating}</Text>
+          <View style={styles.headerStats}>
+            <AnimatedNumber value={me.rank} prefix="#" style={styles.subNumber} />
+            <AnimatedNumber value={me.rating} style={styles.subNumber} />
+          </View>
         </View>
         <PlayerAvatar name={me.name} uri={me.avatar} size={78} />
       </View>
 
       <View style={styles.stats}>
         <View style={styles.stat}><Text style={styles.statValue}>{me.wins}-{me.losses}</Text><Text style={styles.statLabel}>Record</Text></View>
-        <View style={styles.stat}><Text style={styles.statValue}>{winRate(me.wins, me.losses)}%</Text><Text style={styles.statLabel}>Win rate</Text></View>
-        <View style={styles.stat}><Text style={styles.statValue}>{me.streak}</Text><Text style={styles.statLabel}>Streak</Text></View>
+        <View style={styles.stat}><AnimatedNumber value={winRate(me.wins, me.losses)} suffix="%" style={styles.statValue} /><Text style={styles.statLabel}>Win rate</Text></View>
+        <View style={styles.stat}><AnimatedNumber value={me.streak} style={styles.statValue} /><Text style={styles.statLabel}>Streak</Text></View>
       </View>
 
       <View style={styles.panel}>
@@ -51,7 +59,7 @@ export default function ProfileScreen() {
           <Text style={styles.panelTitle}>Rating progress</Text>
           <Text style={styles.panelMeta}>{progress}% to next tier</Text>
         </View>
-        <View style={styles.track}><View style={[styles.fill, { width: `${progress}%` }]} /></View>
+        <ProgressBar value={progress} />
         <View style={styles.cosmeticRow}>
           <Text style={styles.cosmetic}>{me.subscriptionTier || 'free'} profile</Text>
           <Text style={styles.cosmetic}>{me.tokens || me.weeklyPoints || 0} credits</Text>
@@ -63,6 +71,7 @@ export default function ProfileScreen() {
         <View style={styles.panel}>
           <Text style={styles.panelTitle}>Verified record</Text>
           <Text style={styles.panelMeta}>{me.verifiedMatches} verified matches - {me.weeklyPoints} weekly points - {me.streak} streak</Text>
+          <StreakBar value={me.streak} max={7} />
         </View>
       </CollapsibleSection>
 
@@ -79,9 +88,9 @@ export default function ProfileScreen() {
           {[favoriteCourt, ...courts.filter((court) => court.id !== favoriteCourt.id).slice(0, 2)].map((court) => (
             <View key={court.id} style={styles.favorite}>
               <MaterialCommunityIcons name={court.indoor ? 'home-roof' : 'weather-night'} size={20} color={colors.primary} />
-              <View style={{ flex: 1 }}>
-                <Text style={styles.favoriteTitle}>{court.name}</Text>
-                <Text style={styles.panelMeta}>{court.area} - {court.priceRange}</Text>
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <Text numberOfLines={1} style={styles.favoriteTitle}>{court.name}</Text>
+                <Text numberOfLines={1} style={styles.panelMeta}>{court.area} - {court.priceRange}</Text>
               </View>
             </View>
           ))}
@@ -98,9 +107,9 @@ export default function ProfileScreen() {
             .map((player) => (
             <View key={player!.id} style={styles.friendPill}>
               <PlayerAvatar name={player!.name} uri={player!.avatar} size={34} />
-              <View style={{ flex: 1 }}>
+              <View style={{ flex: 1, minWidth: 0 }}>
                 <Text numberOfLines={1} style={styles.favoriteTitle}>{player!.name}</Text>
-                <Text numberOfLines={1} style={styles.friendStatus}>{player!.status}</Text>
+                <Text numberOfLines={1} style={styles.friendStatus}>{formatPlayerStatus(player!.status)}</Text>
               </View>
             </View>
           ))}
@@ -143,7 +152,7 @@ export default function ProfileScreen() {
 
       <CollapsibleSection title="Wallet/Credits" action={`${wallet.credits} 974 Credits`} defaultOpen>
         <View style={styles.walletPanel}>
-          <Text style={styles.walletBig}>{wallet.credits}</Text>
+          <AnimatedNumber value={wallet.credits} style={styles.walletBig} />
           <Text style={styles.walletCopy}>974 Credits earned from verified matches, streaks, challenges, profile completion, and future clip uploads.</Text>
         </View>
       </CollapsibleSection>
@@ -213,6 +222,7 @@ export default function ProfileScreen() {
         <PremiumButton label="Close preview" icon="check" onPress={() => setCosmeticSheet(null)} />
       </ActionSheet>
     </ScrollView>
+    </ScreenTransitionWrapper>
   );
 }
 
@@ -222,32 +232,31 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.primary, paddingTop: 58, paddingBottom: 24, paddingHorizontal: spacing.md },
   kicker: { color: '#F2DCE7', fontWeight: '900', textTransform: 'uppercase', fontSize: 12 },
   name: { color: '#FFFFFF', fontWeight: '900', fontSize: 30, marginTop: 5 },
-  sub: { color: '#F7EEF2', fontWeight: '800', marginTop: 5 },
+  headerStats: { flexDirection: 'row', gap: 8, marginTop: 7, flexWrap: 'wrap' },
+  subNumber: { color: colors.pearl, fontWeight: '900', fontSize: 15 },
   stats: { marginHorizontal: spacing.md, marginTop: -4, flexDirection: 'row', gap: 10 },
-  stat: { flex: 1, backgroundColor: '#FFFFFF', borderRadius: radius.lg, padding: 14, borderWidth: 1, borderColor: colors.border },
+  stat: { flex: 1, backgroundColor: colors.card, borderRadius: radius.lg, padding: 14, borderWidth: 1, borderColor: colors.border },
   statValue: { color: colors.textPrimary, fontWeight: '900', fontSize: 20 },
   statLabel: { color: colors.textSecondary, fontWeight: '800', marginTop: 4, fontSize: 12 },
-  panel: { marginHorizontal: spacing.md, backgroundColor: '#FFFFFF', borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, padding: 14, gap: 10 },
+  panel: { marginHorizontal: spacing.md, backgroundColor: colors.card, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, padding: 14, gap: 10 },
   progressHead: { flexDirection: 'row', justifyContent: 'space-between', gap: 10 },
   panelTitle: { color: colors.textPrimary, fontWeight: '900' },
   panelMeta: { color: colors.textSecondary, fontWeight: '700' },
-  track: { height: 10, borderRadius: 999, backgroundColor: colors.border, overflow: 'hidden' },
-  fill: { height: '100%', borderRadius: 999, backgroundColor: colors.primary },
   cosmeticRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 8 },
   cosmetic: { color: colors.primary, fontWeight: '900', fontSize: 12 },
-  friendSearch: { marginHorizontal: spacing.md, marginBottom: 8, minHeight: 46, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: colors.border, borderRadius: radius.pill, paddingHorizontal: 14, color: colors.textPrimary, fontWeight: '800' },
+  friendSearch: { marginHorizontal: spacing.md, marginBottom: 8, minHeight: 46, backgroundColor: colors.glass, borderWidth: 1, borderColor: colors.border, borderRadius: radius.pill, paddingHorizontal: 14, color: colors.textPrimary, fontWeight: '800' },
   stack: { marginHorizontal: spacing.md, gap: 10 },
-  favorite: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#FFFFFF', borderRadius: radius.md, borderWidth: 1, borderColor: colors.border, padding: 12 },
+  favorite: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: colors.card, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border, padding: 12 },
   favoriteTitle: { color: colors.textPrimary, fontWeight: '900' },
   friendStrip: { marginHorizontal: spacing.md, flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  friendPill: { maxWidth: 178, flexDirection: 'row', alignItems: 'center', gap: 8, padding: 8, paddingRight: 12, borderRadius: radius.pill, backgroundColor: colors.courtSoft, borderWidth: 1, borderColor: '#C7E1D7' },
+  friendPill: { maxWidth: 178, flexDirection: 'row', alignItems: 'center', gap: 8, padding: 8, paddingRight: 12, borderRadius: radius.pill, backgroundColor: colors.glass, borderWidth: 1, borderColor: colors.border },
   friendStatus: { color: colors.textSecondary, fontWeight: '800', fontSize: 10, marginTop: 1 },
   actions: { marginHorizontal: spacing.md, flexDirection: 'row', gap: 10 },
   walletPanel: { marginHorizontal: spacing.md, backgroundColor: colors.darkSection, borderRadius: radius.lg, padding: 16, gap: 8 },
   walletBig: { color: '#FFFFFF', fontSize: 34, fontWeight: '900' },
   walletCopy: { color: '#F2DCE7', fontWeight: '800', lineHeight: 19 },
   cosmeticGrid: { marginHorizontal: spacing.md, gap: 10 },
-  cosmeticCard: { backgroundColor: '#FFFFFF', borderRadius: radius.lg, padding: 12, borderWidth: 1, borderColor: colors.border, gap: 8 },
-  cosmeticActive: { borderColor: colors.primary, backgroundColor: '#FFF8FB' },
+  cosmeticCard: { backgroundColor: colors.card, borderRadius: radius.lg, padding: 12, borderWidth: 1, borderColor: colors.border, gap: 8 },
+  cosmeticActive: { borderColor: colors.hotPink, backgroundColor: colors.softMaroon },
   cosmeticActions: { flexDirection: 'row', gap: 8 },
 });

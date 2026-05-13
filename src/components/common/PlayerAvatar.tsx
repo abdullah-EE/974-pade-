@@ -7,7 +7,7 @@ import { initials } from '@/utils/format';
 export function PlayerAvatar({ name, uri, size = 42 }: { name: string; uri?: string; size?: number }) {
   if (!uri) {
     return (
-      <LinearGradient colors={['#660033', '#8A1E4D']} style={[styles.fallback, { width: size, height: size, borderRadius: size / 2 }]}>
+      <LinearGradient colors={['#660033', '#D45578', '#FF6F9B']} style={[styles.fallback, { width: size, height: size, borderRadius: size / 2 }]}>
         <Text style={styles.initials}>{initials(name)}</Text>
       </LinearGradient>
     );

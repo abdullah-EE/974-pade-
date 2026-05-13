@@ -17,9 +17,9 @@ export function CourtCard({ court, onOpen, onBook, onStartRanked, compact = fals
       </View>
       <View style={styles.body}>
         <View style={styles.top}>
-          <View style={{ flex: 1 }}>
+          <View style={{ flex: 1, minWidth: 0 }}>
             <Text numberOfLines={1} style={styles.name}>{court.name}</Text>
-            <Text style={styles.area}>{court.area}</Text>
+            <Text numberOfLines={1} style={styles.area}>{court.area}</Text>
           </View>
           <View style={styles.badges}>
             <View style={styles.badge}>
@@ -40,7 +40,7 @@ export function CourtCard({ court, onOpen, onBook, onStartRanked, compact = fals
 }
 
 const styles = StyleSheet.create({
-  card: { width: 318, backgroundColor: '#FFFFFF', borderRadius: radius.lg, overflow: 'hidden', borderWidth: 1, borderColor: colors.border, ...shadow, cursor: 'pointer' } as any,
+  card: { width: 318, backgroundColor: colors.card, borderRadius: radius.lg, overflow: 'hidden', borderWidth: 1, borderColor: colors.border, ...shadow, cursor: 'pointer' } as any,
   compact: { width: 292 },
   hovered: { transform: [{ translateY: -5 }, { scale: 1.018 }], shadowOpacity: 0.17, shadowRadius: 24, shadowOffset: { width: 0, height: 14 }, elevation: 9 },
   pressed: { transform: [{ scale: 0.985 }, { translateY: 1 }], shadowOpacity: 0.04 },
@@ -54,6 +54,6 @@ const styles = StyleSheet.create({
   badges: { alignItems: 'flex-end', gap: 6 },
   badge: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: colors.softMaroon, borderRadius: radius.pill, paddingHorizontal: 9, paddingVertical: 5 },
   badgeText: { color: colors.primary, fontWeight: '900', fontSize: 11 },
-  status: { color: colors.textSecondary, fontWeight: '900', fontSize: 11 },
+  status: { color: colors.hotPink, fontWeight: '900', fontSize: 11 },
   actions: { flexDirection: 'row', gap: 8 },
 });

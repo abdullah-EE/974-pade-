@@ -9,10 +9,12 @@ import { ImageWithFallback } from '@/components/common/ImageWithFallback';
 import { MatchCard } from '@/components/common/MatchCard';
 import { PlayerAvatar } from '@/components/common/PlayerAvatar';
 import { PremiumButton } from '@/components/common/PremiumButton';
+import { ScreenTransitionWrapper } from '@/components/common/ScreenTransitionWrapper';
 import { SectionHeader } from '@/components/common/SectionHeader';
 import { TimeSlotChips } from '@/components/common/TimeSlotChips';
 import { useAppState } from '@/state/AppState';
 import { colors, radius, spacing } from '@/theme/tokens';
+import { centeredContent } from '@/theme/layout';
 import { AvailabilitySlot, Player } from '@/types/models';
 
 export default function CourtDetail() {
@@ -36,6 +38,7 @@ export default function CourtDetail() {
   };
 
   return (
+    <ScreenTransitionWrapper>
     <ScrollView style={styles.screen} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <View style={styles.hero}>
         <ImageWithFallback uri={court.image} style={styles.heroImage} label={court.name} />
@@ -136,12 +139,13 @@ export default function CourtDetail() {
         ))}
       </ActionSheet>
     </ScrollView>
+    </ScreenTransitionWrapper>
   );
 }
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
-  content: { paddingBottom: 40, gap: 22 },
+  content: { ...centeredContent, paddingBottom: 40, gap: 22 },
   hero: { height: 338, overflow: 'hidden', backgroundColor: colors.deep },
   heroImage: { width: '100%', height: '100%' },
   back: { position: 'absolute', top: 52, left: 14, width: 42, height: 42, borderRadius: 21, backgroundColor: 'rgba(255,255,255,0.18)', alignItems: 'center', justifyContent: 'center' },
@@ -152,15 +156,15 @@ const styles = StyleSheet.create({
   description: { marginHorizontal: spacing.md, color: colors.textSecondary, fontWeight: '700', lineHeight: 21 },
   actions: { flexDirection: 'row', gap: 10, marginHorizontal: spacing.md },
   amenities: { marginHorizontal: spacing.md, flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  amenity: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#FFFFFF', borderRadius: radius.pill, borderWidth: 1, borderColor: colors.border, paddingHorizontal: 11, paddingVertical: 8 },
+  amenity: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: colors.glass, borderRadius: radius.pill, borderWidth: 1, borderColor: colors.border, paddingHorizontal: 11, paddingVertical: 8 },
   amenityText: { color: colors.textPrimary, fontWeight: '800' },
   players: { marginHorizontal: spacing.md, gap: 9 },
-  playerPill: { flexDirection: 'row', alignItems: 'center', gap: 9, backgroundColor: '#FFFFFF', borderRadius: radius.pill, padding: 8, borderWidth: 1, borderColor: colors.border },
+  playerPill: { flexDirection: 'row', alignItems: 'center', gap: 9, backgroundColor: colors.glass, borderRadius: radius.pill, padding: 8, borderWidth: 1, borderColor: colors.border },
   pressedPill: { transform: [{ scale: 0.98 }, { translateY: 1 }], backgroundColor: colors.softMaroon },
   playerName: { flex: 1, color: colors.textPrimary, fontWeight: '900' },
   matchStack: { marginHorizontal: spacing.md, gap: 10 },
   map: { marginHorizontal: spacing.md, height: 138, borderRadius: radius.lg, backgroundColor: colors.softMaroon, alignItems: 'center', justifyContent: 'center' },
-  mapText: { marginTop: 8, color: colors.primary, fontWeight: '900' },
+  mapText: { marginTop: 8, color: colors.pearl, fontWeight: '900' },
   sheetText: { color: colors.textSecondary, fontWeight: '700', lineHeight: 20 },
   sheetActions: { flexDirection: 'row', gap: 8 },
   sheetRow: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 10, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border },

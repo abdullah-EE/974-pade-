@@ -34,6 +34,6 @@ const styles = StyleSheet.create({
   head: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
   title: { fontSize: 21, fontWeight: '900', color: colors.textPrimary },
   subtitle: { marginTop: 4, color: colors.textSecondary, lineHeight: 19 },
-  close: { width: 34, height: 34, borderRadius: 17, backgroundColor: colors.pearl, alignItems: 'center', justifyContent: 'center' },
+  close: { width: 34, height: 34, borderRadius: 17, backgroundColor: colors.glass, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border },
   closePressed: { transform: [{ scale: 0.92 }] },
 });

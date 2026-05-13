@@ -22,7 +22,7 @@ export function OpenGameCard({ game, court, players, onJoin }: { game: OpenGame;
       </View>
       <View style={styles.host}>
         <PlayerAvatar name={host?.name || 'Host'} uri={host?.avatar} size={38} />
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1, minWidth: 0 }}>
           <Text style={styles.hostLabel}>Hosted by</Text>
           <Text numberOfLines={1} style={styles.hostName}>{host?.name}</Text>
         </View>
@@ -33,13 +33,13 @@ export function OpenGameCard({ game, court, players, onJoin }: { game: OpenGame;
 }
 
 const styles = StyleSheet.create({
-  card: { width: 234, backgroundColor: '#FFFFFF', borderRadius: radius.lg, padding: 14, borderWidth: 1, borderColor: colors.border, gap: 9, ...shadow, cursor: 'pointer' } as any,
+  card: { width: 234, backgroundColor: colors.card, borderRadius: radius.lg, padding: 14, borderWidth: 1, borderColor: colors.border, gap: 9, ...shadow, cursor: 'pointer' } as any,
   hovered: { transform: [{ translateY: -4 }, { scale: 1.018 }], shadowOpacity: 0.17, shadowRadius: 22, shadowOffset: { width: 0, height: 13 }, elevation: 8 },
   pressed: { transform: [{ scale: 0.975 }, { translateY: 1 }], shadowOpacity: 0.04 },
   court: { color: colors.textPrimary, fontSize: 16, fontWeight: '900' },
   time: { color: colors.textSecondary, fontWeight: '800' },
   meta: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 8 },
-  pill: { overflow: 'hidden', backgroundColor: colors.softMaroon, color: colors.primary, borderRadius: radius.pill, paddingHorizontal: 9, paddingVertical: 5, fontWeight: '900', fontSize: 11 },
+  pill: { overflow: 'hidden', backgroundColor: colors.softMaroon, color: colors.pearl, borderRadius: radius.pill, paddingHorizontal: 9, paddingVertical: 5, fontWeight: '900', fontSize: 11 },
   privacy: { overflow: 'hidden', backgroundColor: colors.darkSection, color: '#FFFFFF', borderRadius: radius.pill, paddingHorizontal: 9, paddingVertical: 5, fontWeight: '900', fontSize: 10 },
   spots: { color: colors.textSecondary, fontWeight: '800', fontSize: 12 },
   host: { flexDirection: 'row', alignItems: 'center', gap: 9, minHeight: 38 },

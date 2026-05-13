@@ -24,7 +24,7 @@ export function CoachCard({ coach, onOpen, onRequest }: { coach: Coach; onOpen: 
 }
 
 const styles = StyleSheet.create({
-  card: { width: 238, overflow: 'hidden', backgroundColor: '#FFFFFF', borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, ...shadow, cursor: 'pointer' } as any,
+  card: { width: 238, overflow: 'hidden', backgroundColor: colors.card, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, ...shadow, cursor: 'pointer' } as any,
   hovered: { transform: [{ translateY: -4 }, { scale: 1.018 }], shadowOpacity: 0.17, shadowRadius: 22, shadowOffset: { width: 0, height: 13 }, elevation: 8 },
   pressed: { transform: [{ scale: 0.982 }, { translateY: 1 }], shadowOpacity: 0.04 },
   image: { width: '100%', height: 132 },

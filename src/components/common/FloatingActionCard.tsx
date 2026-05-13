@@ -19,7 +19,7 @@ export function FloatingActionCard({
   const [hovered, setHovered] = useState(false);
   return (
     <Pressable onHoverIn={() => setHovered(true)} onHoverOut={() => setHovered(false)} onPress={onPress} style={({ pressed }) => [styles.card, dark && styles.dark, hovered && !pressed && styles.hovered, pressed && styles.pressed]}>
-      <MaterialCommunityIcons name={icon} size={22} color={dark ? '#FFFFFF' : colors.primary} />
+      <MaterialCommunityIcons name={icon} size={22} color={dark ? colors.pearl : colors.hotPink} />
       <Text style={[styles.title, dark && styles.titleDark]}>{title}</Text>
       <Text style={[styles.meta, dark && styles.metaDark]}>{meta}</Text>
     </Pressable>
@@ -27,8 +27,8 @@ export function FloatingActionCard({
 }
 
 const styles = StyleSheet.create({
-  card: { flex: 1, minHeight: 116, borderRadius: radius.lg, padding: 13, justifyContent: 'space-between', backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: colors.border, shadowColor: '#2A1621', shadowOpacity: 0.13, shadowRadius: 14, shadowOffset: { width: 0, height: 8 }, elevation: 5, cursor: 'pointer' } as any,
-  dark: { backgroundColor: colors.darkSection, borderColor: 'rgba(255,255,255,0.08)' },
+  card: { flex: 1, minHeight: 116, borderRadius: radius.lg, padding: 13, justifyContent: 'space-between', backgroundColor: colors.glass, borderWidth: 1, borderColor: colors.border, shadowColor: '#000000', shadowOpacity: 0.18, shadowRadius: 16, shadowOffset: { width: 0, height: 10 }, elevation: 5, cursor: 'pointer' } as any,
+  dark: { backgroundColor: colors.primary, borderColor: 'rgba(255,111,155,0.34)' },
   hovered: { transform: [{ translateY: -4 }, { scale: 1.02 }], shadowOpacity: 0.22, shadowRadius: 20, shadowOffset: { width: 0, height: 13 }, elevation: 8 },
   pressed: { transform: [{ scale: 0.972 }, { translateY: 1 }], shadowOpacity: 0.05, elevation: 2 },
   title: { color: colors.textPrimary, fontWeight: '900', fontSize: 14, lineHeight: 18 },

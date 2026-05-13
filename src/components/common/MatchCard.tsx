@@ -8,10 +8,10 @@ export function MatchCard({ match, court, players, onConfirm, onDispute }: { mat
   const names = [...match.teamA, ...match.teamB].map((id) => players.find((player) => player.id === id)?.name.split(' ')[0]).filter(Boolean).join(' / ');
   return (
     <Pressable style={({ pressed }) => [styles.card, pressed && styles.pressed]}>
-      <View style={{ flex: 1 }}>
+      <View style={{ flex: 1, minWidth: 0 }}>
         <Text numberOfLines={1} style={styles.title}>{court.name}</Text>
-        <Text style={styles.meta}>{names}</Text>
-        <Text style={styles.meta}>{formatGameTime(match.startsAt)} - {match.score}</Text>
+        <Text numberOfLines={1} style={styles.meta}>{names}</Text>
+        <Text numberOfLines={1} style={styles.meta}>{formatGameTime(match.startsAt)} - {match.score}</Text>
       </View>
       <Text style={styles.status}>{match.status}</Text>
       {match.status === 'Pending' && (onConfirm || onDispute) ? (
@@ -25,10 +25,10 @@ export function MatchCard({ match, court, players, onConfirm, onDispute }: { mat
 }
 
 const styles = StyleSheet.create({
-  card: { backgroundColor: '#FFFFFF', borderRadius: radius.md, padding: 12, borderWidth: 1, borderColor: colors.border, gap: 8, ...shadow },
+  card: { backgroundColor: colors.card, borderRadius: radius.md, padding: 12, borderWidth: 1, borderColor: colors.border, gap: 8, ...shadow },
   pressed: { transform: [{ scale: 0.985 }, { translateY: 1 }], shadowOpacity: 0.04 },
   title: { color: colors.textPrimary, fontWeight: '900' },
   meta: { color: colors.textSecondary, fontWeight: '700', marginTop: 3 },
-  status: { alignSelf: 'flex-start', overflow: 'hidden', backgroundColor: colors.softMaroon, color: colors.primary, borderRadius: radius.pill, paddingHorizontal: 9, paddingVertical: 5, fontWeight: '900', fontSize: 11 },
+  status: { alignSelf: 'flex-start', overflow: 'hidden', backgroundColor: colors.softMaroon, color: colors.pearl, borderRadius: radius.pill, paddingHorizontal: 9, paddingVertical: 5, fontWeight: '900', fontSize: 11 },
   actions: { flexDirection: 'row', gap: 8 },
 });

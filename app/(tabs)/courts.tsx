@@ -15,6 +15,7 @@ import { HorizontalCardRail } from '@/components/common/HorizontalCardRail';
 import { OpenGameCard } from '@/components/common/OpenGameCard';
 import { PremiumButton } from '@/components/common/PremiumButton';
 import { SearchBar } from '@/components/common/SearchBar';
+import { ScreenTransitionWrapper } from '@/components/common/ScreenTransitionWrapper';
 import { TimeSlotChips } from '@/components/common/TimeSlotChips';
 import { VideoCard } from '@/components/common/VideoCard';
 import { useAppState } from '@/state/AppState';
@@ -86,6 +87,7 @@ export default function PlayScreen() {
   };
 
   return (
+    <ScreenTransitionWrapper>
     <ScrollView style={styles.screen} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <HeroCarousel courts={courts} />
       <CollapsibleSection title="Quick Actions" action="Challenge, train, submit, watch" defaultOpen>
@@ -143,7 +145,7 @@ export default function PlayScreen() {
                   <Text style={styles.playerInitials}>{player.name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</Text>
                 </View>
                 <Text numberOfLines={1} style={styles.playerName}>{player.name}</Text>
-                <Text style={styles.playerMeta}>{player.level} - {player.status === 'playingTonight' ? 'playing tonight' : player.status}</Text>
+                <Text numberOfLines={1} style={styles.playerMeta}>{player.level} - {player.status === 'playingTonight' ? 'playing tonight' : player.status}</Text>
                 <View style={styles.playerActions}>
                   <PremiumButton label={isFriend ? 'Friend' : 'Add'} icon={isFriend ? 'account-check' : 'account-plus-outline'} variant={isFriend ? 'subtle' : 'secondary'} onPress={() => (isFriend ? removeFriend(player.id) : addFriend(player.id))} style={{ flex: 1 }} />
                   <PremiumButton label="Challenge" icon="sword-cross" onPress={() => router.push(`/player/${player.id}`)} style={{ flex: 1 }} />
@@ -243,6 +245,7 @@ export default function PlayScreen() {
         ) : null}
       </ActionSheet>
     </ScrollView>
+    </ScreenTransitionWrapper>
   );
 }
 
@@ -253,23 +256,23 @@ const styles = StyleSheet.create({
   stack: { gap: 14 },
   quickGrid: { flexDirection: 'row', gap: 10 },
   quickPressed: { transform: [{ scale: 0.975 }, { translateY: 1 }], shadowOpacity: 0.05 },
-  modeRow: { flexDirection: 'row', padding: 4, borderRadius: radius.pill, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: colors.border },
+  modeRow: { flexDirection: 'row', padding: 4, borderRadius: radius.pill, backgroundColor: colors.glass, borderWidth: 1, borderColor: colors.border },
   modeChip: { flex: 1, alignItems: 'center', paddingVertical: 9, borderRadius: radius.pill },
-  modeActive: { backgroundColor: colors.primary },
+  modeActive: { backgroundColor: colors.primary, shadowColor: colors.hotPink, shadowOpacity: 0.26, shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, elevation: 4 },
   chipPressed: { transform: [{ scale: 0.96 }, { translateY: 1 }] },
   modeText: { color: colors.textSecondary, fontWeight: '900' },
   modeTextActive: { color: '#FFFFFF' },
-  playerCard: { width: 210, backgroundColor: '#FFFFFF', borderRadius: radius.lg, padding: 14, borderWidth: 1, borderColor: colors.border, gap: 9, shadowColor: '#2A1621', shadowOpacity: 0.08, shadowRadius: 12, shadowOffset: { width: 0, height: 7 }, elevation: 4 },
+  playerCard: { width: 210, backgroundColor: colors.card, borderRadius: radius.lg, padding: 14, borderWidth: 1, borderColor: colors.border, gap: 9, shadowColor: '#000000', shadowOpacity: 0.18, shadowRadius: 14, shadowOffset: { width: 0, height: 9 }, elevation: 4 },
   playerAvatar: { width: 54, height: 54, borderRadius: 27, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.softMaroon, borderWidth: 1, borderColor: colors.border },
-  playerInitials: { color: colors.primary, fontWeight: '900' },
+  playerInitials: { color: colors.pearl, fontWeight: '900' },
   playerName: { color: colors.textPrimary, fontWeight: '900', fontSize: 16 },
   playerMeta: { color: colors.textSecondary, fontWeight: '800', fontSize: 12 },
   playerActions: { flexDirection: 'row', gap: 8 },
   sheetText: { color: colors.textSecondary, fontWeight: '700', lineHeight: 20 },
   sheetActions: { flexDirection: 'row', gap: 8 },
   selector: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  slotChoice: { paddingHorizontal: 12, paddingVertical: 9, borderRadius: radius.pill, borderWidth: 1, borderColor: colors.border, backgroundColor: '#FFFFFF' },
-  slotActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+  slotChoice: { paddingHorizontal: 12, paddingVertical: 9, borderRadius: radius.pill, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.glass },
+  slotActive: { backgroundColor: colors.primary, borderColor: colors.hotPink },
   slotText: { color: colors.textSecondary, fontWeight: '900' },
   slotTextActive: { color: '#FFFFFF' },
   darkBand: { marginHorizontal: -spacing.md, paddingVertical: 20, paddingLeft: spacing.md, backgroundColor: colors.darkSection, gap: 12 },

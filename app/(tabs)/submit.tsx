@@ -9,6 +9,7 @@ import { ImageWithFallback } from '@/components/common/ImageWithFallback';
 import { MatchCard } from '@/components/common/MatchCard';
 import { PlayerAvatar } from '@/components/common/PlayerAvatar';
 import { PremiumButton } from '@/components/common/PremiumButton';
+import { ScreenTransitionWrapper } from '@/components/common/ScreenTransitionWrapper';
 import { useAppState } from '@/state/AppState';
 import { colors, radius, spacing } from '@/theme/tokens';
 import { centeredContent } from '@/theme/layout';
@@ -78,6 +79,7 @@ export default function SubmitScreen() {
   };
 
   return (
+    <ScreenTransitionWrapper>
     <ScrollView style={styles.screen} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <View>
         <Text style={styles.kicker}>Verified match submission</Text>
@@ -98,9 +100,9 @@ export default function SubmitScreen() {
           {courts.map((court) => (
             <Pressable key={court.id} onPress={() => setSelectedCourtId(court.id)} style={({ pressed }) => [styles.court, selectedCourtId === court.id && styles.selected, pressed && styles.pressed]}>
               <ImageWithFallback uri={court.image} style={styles.courtImage} label={court.name} />
-              <View style={{ flex: 1 }}>
-                <Text style={styles.cardTitle}>{court.name}</Text>
-                <Text style={styles.meta}>{court.area} - {court.indoor ? 'Indoor' : 'Outdoor'}</Text>
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <Text numberOfLines={1} style={styles.cardTitle}>{court.name}</Text>
+                <Text numberOfLines={1} style={styles.meta}>{court.area} - {court.indoor ? 'Indoor' : 'Outdoor'}</Text>
               </View>
               {selectedCourtId === court.id ? <MaterialCommunityIcons name="check-circle" size={22} color={colors.primary} /> : null}
             </Pressable>
@@ -128,9 +130,9 @@ export default function SubmitScreen() {
             return (
               <Pressable key={player.id} onPress={() => togglePlayer(player.id)} style={({ pressed }) => [styles.playerRow, picked && styles.selected, pressed && styles.pressed]}>
                 <PlayerAvatar name={player.name} uri={player.avatar} size={42} />
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.cardTitle}>{player.name}</Text>
-                  <Text style={styles.meta}>{player.level} - rating {player.rating}</Text>
+                <View style={{ flex: 1, minWidth: 0 }}>
+                  <Text numberOfLines={1} style={styles.cardTitle}>{player.name}</Text>
+                  <Text numberOfLines={1} style={styles.meta}>{player.level} - rating {player.rating}</Text>
                 </View>
                 {team ? <Text style={styles.teamBadge}>{team}</Text> : null}
               </Pressable>
@@ -192,34 +194,35 @@ export default function SubmitScreen() {
         <PremiumButton label="View pending matches" icon="clipboard-list-outline" onPress={() => setDone(false)} />
       </ActionSheet>
     </ScrollView>
+    </ScreenTransitionWrapper>
   );
 }
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
   content: { ...centeredContent, padding: spacing.md, gap: 20, paddingBottom: 104 },
-  kicker: { color: colors.primary, fontWeight: '900', textTransform: 'uppercase', fontSize: 12 },
+  kicker: { color: colors.hotPink, fontWeight: '900', textTransform: 'uppercase', fontSize: 12 },
   title: { color: colors.textPrimary, fontSize: 34, fontWeight: '900', marginTop: 3 },
   progress: { flexDirection: 'row', gap: 8 },
-  step: { flex: 1, height: 9, borderRadius: 99, backgroundColor: colors.border },
-  stepActive: { backgroundColor: colors.primary },
+  step: { flex: 1, height: 9, borderRadius: 99, backgroundColor: colors.divider },
+  stepActive: { backgroundColor: colors.hotPink },
   pressed: { transform: [{ scale: 0.985 }, { translateY: 1 }] },
   stepText: { opacity: 0, fontSize: 1 },
   stepTextActive: { opacity: 0 },
   stepLabel: { color: colors.textPrimary, fontWeight: '900', fontSize: 20 },
   stack: { gap: 10 },
-  court: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#FFFFFF', borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, padding: 10 },
-  selected: { borderColor: colors.primary, backgroundColor: '#FFF8FB' },
+  court: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: colors.card, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, padding: 10 },
+  selected: { borderColor: colors.hotPink, backgroundColor: colors.softMaroon },
   courtImage: { width: 78, height: 62, borderRadius: radius.md },
   cardTitle: { color: colors.textPrimary, fontWeight: '900', fontSize: 16 },
   meta: { color: colors.textSecondary, fontWeight: '700', marginTop: 3, lineHeight: 19 },
   help: { color: colors.textSecondary, fontWeight: '700' },
-  friendToggle: { alignSelf: 'flex-start', paddingHorizontal: 13, paddingVertical: 9, borderRadius: radius.pill, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: colors.border },
-  friendToggleText: { color: colors.primary, fontWeight: '900' },
-  playerRow: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#FFFFFF', borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, padding: 12 },
-  teamBadge: { overflow: 'hidden', backgroundColor: colors.softMaroon, color: colors.primary, borderRadius: radius.pill, paddingHorizontal: 9, paddingVertical: 5, fontWeight: '900', fontSize: 11 },
-  panel: { backgroundColor: '#FFFFFF', borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, padding: 14, gap: 8 },
+  friendToggle: { alignSelf: 'flex-start', paddingHorizontal: 13, paddingVertical: 9, borderRadius: radius.pill, backgroundColor: colors.glass, borderWidth: 1, borderColor: colors.border },
+  friendToggleText: { color: colors.pearl, fontWeight: '900' },
+  playerRow: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: colors.card, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, padding: 12 },
+  teamBadge: { overflow: 'hidden', backgroundColor: colors.softMaroon, color: colors.pearl, borderRadius: radius.pill, paddingHorizontal: 9, paddingVertical: 5, fontWeight: '900', fontSize: 11 },
+  panel: { backgroundColor: colors.card, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, padding: 14, gap: 8 },
   actions: { flexDirection: 'row', gap: 8 },
-  input: { minHeight: 50, borderWidth: 1, borderColor: colors.border, borderRadius: radius.md, paddingHorizontal: 12, color: colors.textPrimary, fontWeight: '800', backgroundColor: colors.pearl },
+  input: { minHeight: 50, borderWidth: 1, borderColor: colors.border, borderRadius: radius.md, paddingHorizontal: 12, color: colors.textPrimary, fontWeight: '800', backgroundColor: colors.glass },
   proofImage: { width: '100%', height: 160, borderRadius: radius.md },
 });

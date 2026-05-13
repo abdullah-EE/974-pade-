@@ -2,9 +2,11 @@ import { useLocalSearchParams } from 'expo-router';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { MatchCard } from '@/components/common/MatchCard';
 import { PremiumButton } from '@/components/common/PremiumButton';
+import { ScreenTransitionWrapper } from '@/components/common/ScreenTransitionWrapper';
 import { SectionHeader } from '@/components/common/SectionHeader';
 import { useAppState } from '@/state/AppState';
 import { colors, radius, shadow, spacing } from '@/theme/tokens';
+import { centeredContent } from '@/theme/layout';
 import { formatGameTime } from '@/utils/format';
 
 export default function MatchDetail() {
@@ -14,6 +16,7 @@ export default function MatchDetail() {
   const court = courts.find((item) => item.id === match.courtId) || courts[0];
 
   return (
+    <ScreenTransitionWrapper>
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <Text style={styles.title}>Match Detail</Text>
       <MatchCard match={match} court={court} players={players} />
@@ -31,14 +34,15 @@ export default function MatchDetail() {
         <PremiumButton label="Dispute Result" variant="secondary" icon="alert-circle-outline" onPress={() => updateMatchStatus(match.id, 'Disputed')} style={{ flex: 1 }} />
       </View>
     </ScrollView>
+    </ScreenTransitionWrapper>
   );
 }
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.md, gap: 16 },
+  content: { ...centeredContent, padding: spacing.md, gap: 16 },
   title: { color: colors.textPrimary, fontSize: 30, fontWeight: '900' },
-  panel: { backgroundColor: '#FFFFFF', borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, padding: 14, gap: 6, ...shadow },
+  panel: { backgroundColor: colors.card, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, padding: 14, gap: 6, ...shadow },
   label: { color: colors.textSecondary, fontWeight: '800', fontSize: 12, textTransform: 'uppercase' },
   value: { color: colors.textPrimary, fontWeight: '800', marginBottom: 6 },
   actions: { flexDirection: 'row', gap: 10 },

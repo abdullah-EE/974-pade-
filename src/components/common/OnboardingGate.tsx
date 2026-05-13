@@ -82,16 +82,16 @@ export function OnboardingGate() {
 
 const styles = StyleSheet.create({
   backdrop: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(26,16,21,0.56)' },
-  sheet: { backgroundColor: colors.pearl, borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: spacing.xl, gap: 14 },
-  kicker: { color: colors.primary, fontSize: 12, fontWeight: '900', textTransform: 'uppercase' },
+  sheet: { backgroundColor: colors.card, borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: spacing.xl, gap: 14, borderWidth: 1, borderColor: colors.border },
+  kicker: { color: colors.hotPink, fontSize: 12, fontWeight: '900', textTransform: 'uppercase' },
   title: { color: colors.textPrimary, fontSize: 30, lineHeight: 35, fontWeight: '900' },
   subtitle: { color: colors.textSecondary, fontWeight: '700', lineHeight: 20 },
-  input: { minHeight: 52, backgroundColor: '#FFFFFF', borderRadius: radius.md, borderWidth: 1, borderColor: colors.border, paddingHorizontal: 14, color: colors.textPrimary, fontWeight: '800' },
-  avatarRow: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#FFFFFF', borderRadius: radius.lg, padding: 12, borderWidth: 1, borderColor: colors.border },
+  input: { minHeight: 52, backgroundColor: colors.glass, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border, paddingHorizontal: 14, color: colors.textPrimary, fontWeight: '800' },
+  avatarRow: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.glass, borderRadius: radius.lg, padding: 12, borderWidth: 1, borderColor: colors.border },
   label: { color: colors.textPrimary, fontWeight: '900', marginTop: 2 },
   row: { flexDirection: 'row', gap: 8, paddingRight: spacing.md },
-  chip: { paddingHorizontal: 13, paddingVertical: 9, borderRadius: radius.pill, borderWidth: 1, borderColor: colors.border, backgroundColor: '#FFFFFF' },
-  chipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+  chip: { paddingHorizontal: 13, paddingVertical: 9, borderRadius: radius.pill, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.glass },
+  chipActive: { backgroundColor: colors.primary, borderColor: colors.hotPink },
   chipText: { color: colors.textSecondary, fontWeight: '800' },
   chipTextActive: { color: '#FFFFFF' },
 });

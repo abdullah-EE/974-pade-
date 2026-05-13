@@ -12,6 +12,6 @@ export function SearchBar({ value, onChangeText, placeholder = 'Search courts or
 }
 
 const styles = StyleSheet.create({
-  wrap: { minHeight: 50, flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: colors.border, borderRadius: radius.pill, paddingHorizontal: spacing.md },
+  wrap: { minHeight: 50, flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: colors.glass, borderWidth: 1, borderColor: colors.border, borderRadius: radius.pill, paddingHorizontal: spacing.md },
   input: { flex: 1, color: colors.textPrimary, fontSize: 15, fontWeight: '600' },
 });

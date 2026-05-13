@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { MotiView } from 'moti';
 import { colors, radius } from '@/theme/tokens';
 import { AvailabilitySlot } from '@/types/models';
 
@@ -27,8 +28,10 @@ export function TimeSlotChips({
         const selected = selectedId === item.id;
         return (
           <Pressable key={item.id} disabled={disabled} onPress={() => onSelect?.(item)} style={({ pressed }) => [styles.chip, selected && styles.chipSelected, disabled && styles.chipDisabled, pressed && !disabled && styles.pressed]}>
-            <Text style={[styles.label, selected && styles.labelSelected, disabled && styles.labelDisabled]}>{item.label}</Text>
+            <MotiView animate={{ scale: selected ? 1.04 : 1 }} transition={{ type: 'timing', duration: 160 }}>
+            <Text numberOfLines={1} style={[styles.label, selected && styles.labelSelected, disabled && styles.labelDisabled]}>{item.label}</Text>
             {item.status !== 'available' ? <Text style={[styles.status, selected && styles.labelSelected, disabled && styles.labelDisabled]}>{item.status === 'few-left' ? 'Few left' : 'Fully booked'}</Text> : null}
+            </MotiView>
           </Pressable>
         );
       })}
@@ -38,10 +41,10 @@ export function TimeSlotChips({
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  chip: { minHeight: 34, justifyContent: 'center', backgroundColor: colors.softMaroon, paddingHorizontal: 10, paddingVertical: 6, borderRadius: radius.pill, borderWidth: 1, borderColor: 'transparent' },
-  chipSelected: { backgroundColor: colors.primary, borderColor: colors.primary },
-  chipDisabled: { opacity: 0.44, backgroundColor: colors.border },
-  label: { color: colors.primary, fontWeight: '900', fontSize: 12 },
+  chip: { minHeight: 34, justifyContent: 'center', backgroundColor: colors.glass, paddingHorizontal: 10, paddingVertical: 6, borderRadius: radius.pill, borderWidth: 1, borderColor: colors.border },
+  chipSelected: { backgroundColor: colors.primary, borderColor: colors.hotPink },
+  chipDisabled: { opacity: 0.44, backgroundColor: colors.divider },
+  label: { color: colors.pearl, fontWeight: '900', fontSize: 12 },
   labelSelected: { color: '#FFFFFF' },
   labelDisabled: { color: colors.textSecondary },
   status: { color: colors.primary, fontSize: 10, fontWeight: '800', marginTop: 1 },

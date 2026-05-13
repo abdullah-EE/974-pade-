@@ -7,6 +7,8 @@ import { CollapsibleSection } from '@/components/common/CollapsibleSection';
 import { HorizontalCardRail } from '@/components/common/HorizontalCardRail';
 import { OpenGameCard } from '@/components/common/OpenGameCard';
 import { PremiumButton } from '@/components/common/PremiumButton';
+import { ScreenTransitionWrapper } from '@/components/common/ScreenTransitionWrapper';
+import { StaggeredList } from '@/components/common/StaggeredList';
 import { useAppState } from '@/state/AppState';
 import { colors, radius, spacing } from '@/theme/tokens';
 import { centeredContent } from '@/theme/layout';
@@ -45,16 +47,19 @@ export default function ChallengesScreen() {
     const items = challenges.filter((challenge) => challenge.status === status);
     return (
       <View style={styles.stack}>
+        <StaggeredList>
         {items.map((challenge) => {
           const opponent = players.find((player) => player.id === (challenge.from === currentUser.id ? challenge.to : challenge.from)) || players[0];
           const court = courts.find((item) => item.id === challenge.courtId) || courts[0];
           return <ChallengeCard key={challenge.id} challenge={challenge} opponent={opponent} court={court} onOpen={() => setDetail(challenge)} onAccept={() => updateChallenge(challenge.id, 'Accepted')} onDecline={() => updateChallenge(challenge.id, 'Declined')} />;
         })}
+        </StaggeredList>
       </View>
     );
   };
 
   return (
+    <ScreenTransitionWrapper>
     <ScrollView style={styles.screen} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <View style={styles.header}>
         <View style={{ flex: 1 }}>
@@ -177,6 +182,7 @@ export default function ChallengesScreen() {
         ) : null}
       </ActionSheet>
     </ScrollView>
+    </ScreenTransitionWrapper>
   );
 }
 
@@ -184,23 +190,23 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
   content: { ...centeredContent, padding: spacing.md, gap: 22, paddingBottom: 104 },
   header: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  kicker: { color: colors.primary, fontWeight: '900', textTransform: 'uppercase', fontSize: 12 },
+  kicker: { color: colors.hotPink, fontWeight: '900', textTransform: 'uppercase', fontSize: 12 },
   title: { color: colors.textPrimary, fontSize: 34, fontWeight: '900', marginTop: 3 },
   horizontal: { gap: 12, paddingRight: spacing.md },
   stack: { gap: 10 },
   sheetLabel: { color: colors.textPrimary, fontWeight: '900' },
   selector: { flexDirection: 'row', gap: 8, paddingRight: spacing.md },
-  choice: { paddingHorizontal: 12, paddingVertical: 9, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: colors.border, borderRadius: radius.pill },
-  choiceActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+  choice: { paddingHorizontal: 12, paddingVertical: 9, backgroundColor: colors.glass, borderWidth: 1, borderColor: colors.border, borderRadius: radius.pill },
+  choiceActive: { backgroundColor: colors.primary, borderColor: colors.hotPink },
   pressedChoice: { transform: [{ scale: 0.96 }, { translateY: 1 }] },
   choiceText: { color: colors.textSecondary, fontWeight: '800' },
   choiceTextActive: { color: '#FFFFFF' },
-  openInvite: { gap: 4, padding: 12, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: colors.border, borderRadius: radius.md },
+  openInvite: { gap: 4, padding: 12, backgroundColor: colors.glass, borderWidth: 1, borderColor: colors.border, borderRadius: radius.md },
   openInviteMeta: { color: colors.textSecondary, fontWeight: '700', fontSize: 12 },
-  input: { minHeight: 46, borderWidth: 1, borderColor: colors.border, borderRadius: radius.pill, paddingHorizontal: 14, color: colors.textPrimary, fontWeight: '800', backgroundColor: '#FFFFFF' },
-  note: { minHeight: 72, borderWidth: 1, borderColor: colors.border, borderRadius: radius.md, padding: 12, color: colors.textPrimary, fontWeight: '800', backgroundColor: '#FFFFFF' },
+  input: { minHeight: 46, borderWidth: 1, borderColor: colors.border, borderRadius: radius.pill, paddingHorizontal: 14, color: colors.textPrimary, fontWeight: '800', backgroundColor: colors.glass },
+  note: { minHeight: 72, borderWidth: 1, borderColor: colors.border, borderRadius: radius.md, padding: 12, color: colors.textPrimary, fontWeight: '800', backgroundColor: colors.glass },
   detailText: { color: colors.textSecondary, fontWeight: '800', lineHeight: 20 },
   detailActions: { flexDirection: 'row', gap: 8 },
   success: { backgroundColor: colors.softMaroon, borderRadius: radius.lg, padding: 16 },
-  successText: { color: colors.primary, fontWeight: '900', textAlign: 'center' },
+  successText: { color: colors.pearl, fontWeight: '900', textAlign: 'center' },
 });

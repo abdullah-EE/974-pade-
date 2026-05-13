@@ -13,9 +13,9 @@ export function ChallengeCard({ challenge, opponent, court, onAccept, onDecline,
     <Pressable onPress={onOpen} style={({ pressed }) => [styles.card, pressed && styles.pressed]}>
       <View style={styles.row}>
         <PlayerAvatar name={opponent.name} uri={opponent.avatar} size={46} />
-        <View style={{ flex: 1 }}>
-          <Text style={styles.name}>{opponent.name}</Text>
-          <Text style={styles.meta}>{court.name}</Text>
+        <View style={{ flex: 1, minWidth: 0 }}>
+          <Text numberOfLines={1} style={styles.name}>{opponent.name}</Text>
+          <Text numberOfLines={1} style={styles.meta}>{court.name}</Text>
           <Text style={styles.meta}>{formatGameTime(challenge.startsAt)} - {challenge.level}</Text>
           {challenge.note ? <Text numberOfLines={1} style={styles.note}>{challenge.note}</Text> : null}
         </View>
@@ -35,12 +35,12 @@ export function ChallengeCard({ challenge, opponent, court, onAccept, onDecline,
 }
 
 const styles = StyleSheet.create({
-  card: { backgroundColor: '#FFFFFF', borderRadius: radius.lg, padding: 14, borderWidth: 1, borderColor: colors.border, gap: 12, ...shadow },
+  card: { backgroundColor: colors.glass, borderRadius: radius.lg, padding: 14, borderWidth: 1, borderColor: colors.border, gap: 12, ...shadow },
   pressed: { transform: [{ scale: 0.985 }, { translateY: 1 }], shadowOpacity: 0.04 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   name: { color: colors.textPrimary, fontSize: 16, fontWeight: '900' },
   meta: { color: colors.textSecondary, fontWeight: '700', marginTop: 3 },
-  status: { overflow: 'hidden', backgroundColor: colors.softMaroon, color: colors.primary, borderRadius: radius.pill, paddingHorizontal: 9, paddingVertical: 5, fontWeight: '900', fontSize: 11 },
+  status: { overflow: 'hidden', backgroundColor: colors.softMaroon, color: colors.hotPink, borderRadius: radius.pill, paddingHorizontal: 9, paddingVertical: 5, fontWeight: '900', fontSize: 11 },
   statusStack: { alignItems: 'flex-end', gap: 5 },
   private: { overflow: 'hidden', backgroundColor: colors.darkSection, color: '#FFFFFF', borderRadius: radius.pill, paddingHorizontal: 8, paddingVertical: 4, fontWeight: '900', fontSize: 10 },
   note: { color: colors.textPrimary, fontWeight: '800', marginTop: 5 },

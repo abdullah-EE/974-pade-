@@ -4,6 +4,8 @@ import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { CollapsibleSection } from '@/components/common/CollapsibleSection';
 import { FilterChips } from '@/components/common/FilterChips';
 import { RankingPodium, RankingRow } from '@/components/common/Ranking';
+import { ScreenTransitionWrapper } from '@/components/common/ScreenTransitionWrapper';
+import { StaggeredList } from '@/components/common/StaggeredList';
 import { HorizontalCardRail } from '@/components/common/HorizontalCardRail';
 import { useAppState } from '@/state/AppState';
 import { colors, radius, spacing } from '@/theme/tokens';
@@ -26,6 +28,7 @@ export default function RankingsScreen() {
   }, [currentUser.club, currentUser.id, filter, friendIds, players, query]);
 
   return (
+    <ScreenTransitionWrapper>
     <ScrollView style={styles.screen} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <View>
         <Text style={styles.kicker}>Verified Qatar leaderboard</Text>
@@ -48,6 +51,7 @@ export default function RankingsScreen() {
       <FilterChips items={filters} active={filter} onChange={setFilter} />
       <CollapsibleSection title={filter === 'Friends' ? 'Friends Ranking' : filter === 'Club' ? 'Club Ranking' : 'Top 100'} action={filter} defaultOpen>
         <View style={styles.rows}>
+          <StaggeredList>
           {ranked.map((player) => (
             <RankingRow
               key={player.id}
@@ -57,20 +61,22 @@ export default function RankingsScreen() {
               onOpen={() => router.push(`/player/${player.id}`)}
             />
           ))}
+          </StaggeredList>
         </View>
       </CollapsibleSection>
     </ScrollView>
+    </ScreenTransitionWrapper>
   );
 }
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
   content: { ...centeredContent, padding: spacing.md, gap: 22, paddingBottom: 104 },
-  kicker: { color: colors.primary, fontWeight: '900', textTransform: 'uppercase', fontSize: 12 },
+  kicker: { color: colors.hotPink, fontWeight: '900', textTransform: 'uppercase', fontSize: 12 },
   title: { color: colors.textPrimary, fontSize: 34, fontWeight: '900', marginTop: 3 },
-  search: { minHeight: 50, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: colors.border, borderRadius: radius.pill, paddingHorizontal: 16, color: colors.textPrimary, fontWeight: '800' },
+  search: { minHeight: 50, backgroundColor: colors.glass, borderWidth: 1, borderColor: colors.border, borderRadius: radius.pill, paddingHorizontal: 16, color: colors.textPrimary, fontWeight: '800' },
   movers: { gap: 10, paddingRight: spacing.md },
-  mover: { width: 154, backgroundColor: colors.darkSection, borderRadius: 16, padding: 14 },
+  mover: { width: 154, backgroundColor: colors.card, borderRadius: 16, padding: 14, borderWidth: 1, borderColor: colors.border },
   moverName: { color: '#FFFFFF', fontWeight: '900' },
   moverMeta: { color: '#F2DCE7', marginTop: 6, fontWeight: '800' },
   rows: { gap: 9 },

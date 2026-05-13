@@ -13,9 +13,9 @@ export function SlotButton({ slot, selected, onSelect }: { slot: AvailabilitySlo
 }
 
 const styles = StyleSheet.create({
-  slot: { minWidth: 112, paddingHorizontal: 13, paddingVertical: 10, borderRadius: radius.md, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: colors.border },
-  selected: { backgroundColor: colors.primary, borderColor: colors.primary, transform: [{ translateY: -1 }] },
-  disabled: { opacity: 0.44, backgroundColor: colors.border },
+  slot: { minWidth: 112, paddingHorizontal: 13, paddingVertical: 10, borderRadius: radius.md, backgroundColor: colors.glass, borderWidth: 1, borderColor: colors.border },
+  selected: { backgroundColor: colors.primary, borderColor: colors.hotPink, transform: [{ translateY: -1 }, { scale: 1.02 }] },
+  disabled: { opacity: 0.44, backgroundColor: colors.divider },
   pressed: { transform: [{ scale: 0.96 }, { translateY: 1 }] },
   time: { color: colors.textPrimary, fontWeight: '900' },
   status: { color: colors.textSecondary, fontWeight: '800', fontSize: 11, marginTop: 3 },
