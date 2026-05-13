@@ -5,3 +5,11 @@ export interface Court { id: string; name: string; area: Area; indoor: boolean; 
 export interface Player { id: string; name: string; username: string; avatar: string; rank: number; rating: number; movement: number; level: Level; verified: boolean; favoriteCourt: string; wins:number; losses:number; }
 export interface Match { id: string; teamA: string[]; teamB: string[]; winner: 'A'|'B'; score: string; courtId: string; date: string; ratingChange: number; status: 'Pending'|'Verified'|'Disputed'; }
 export interface Challenge { id:string; from:string; to:string; courtId:string; date:string; status:'Incoming'|'Sent'|'Accepted'; }
+
+export interface LocalAccount {
+  id?: string;
+  name: string;
+  username: string;
+  level: Level;
+  favoriteArea: Area;
+}

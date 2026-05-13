@@ -9,7 +9,10 @@ export const colors = {
   border: '#E8DFE3',
   darkSection: '#1A1015',
   success: '#237a57',
-  danger: '#b63c4d'
+  danger: '#b63c4d',
+  text: '#171014',
+  muted: '#6F666B',
+  surface: '#FFFFFF'
 };
 
 export const spacing = { xs: 6, sm: 10, md: 14, lg: 18, xl: 24, xxl: 32 };
