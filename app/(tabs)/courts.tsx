@@ -1,19 +1,284 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useMemo, useState } from 'react';
 import { router } from 'expo-router';
-import { BlurView } from 'expo-blur';
-import { LinearGradient } from 'expo-linear-gradient';
+import * as Linking from 'expo-linking';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { MotiView } from 'moti';
-import { courts, openGames } from '@/data/mockData';
-import { colors } from '@/theme/tokens';
-import { SearchBar } from '@/components/common/SearchBar';
+import { ActionSheet } from '@/components/common/ActionSheet';
+import { CoachCard } from '@/components/common/CoachCard';
+import { CollapsibleSection } from '@/components/common/CollapsibleSection';
+import { CourtCard } from '@/components/common/CourtCard';
+import { EmptyState } from '@/components/common/EmptyState';
 import { FilterChips } from '@/components/common/FilterChips';
-import { ImageWithFallback } from '@/components/common/ImageWithFallback';
+import { FloatingActionCard } from '@/components/common/FloatingActionCard';
+import { HeroCarousel } from '@/components/common/HeroCarousel';
+import { HorizontalCardRail } from '@/components/common/HorizontalCardRail';
+import { OpenGameCard } from '@/components/common/OpenGameCard';
 import { PremiumButton } from '@/components/common/PremiumButton';
+import { SearchBar } from '@/components/common/SearchBar';
+import { TimeSlotChips } from '@/components/common/TimeSlotChips';
+import { VideoCard } from '@/components/common/VideoCard';
+import { useAppState } from '@/state/AppState';
+import { colors, radius, spacing } from '@/theme/tokens';
+import { AvailabilitySlot, Court } from '@/types/models';
+import { Coach } from '@/types/Coach';
+import { VideoPost } from '@/types/VideoPost';
+import { winRate } from '@/utils/format';
 
-export default function Courts() {const [q,setQ]=useState('');const [f,setF]=useState<string[]>([]);const [sheet,setSheet]=useState<{type:'book'|'ranked',name:string}|null>(null);const heroRef=useRef<ScrollView>(null);const [idx,setIdx]=useState(0);
-useEffect(()=>{const i=setInterval(()=>{const n=(idx+1)%3;setIdx(n);heroRef.current?.scrollTo({x:n*360,animated:true});},3500);return()=>clearInterval(i);},[idx]);
-const filtered=useMemo(()=>courts.filter(c=>(`${c.name} ${c.area}`.toLowerCase().includes(q.toLowerCase()))&&(f.length===0||f.some(x=>x==='Indoor'?c.indoor:x==='Outdoor'?!c.indoor:c.area.includes(x)))),[q,f]);
-return <ScrollView style={s.w} contentContainerStyle={{padding:14,gap:16}}><ScrollView ref={heroRef} horizontal pagingEnabled showsHorizontalScrollIndicator={false}>{courts.slice(0,3).map(c=><Pressable key={c.id} onPress={()=>router.push(`/court/${c.id}`)} style={s.heroWrap}><ImageWithFallback uri={c.image} style={s.hero}/><LinearGradient colors={['transparent','rgba(26,16,21,0.8)']} style={s.g}/><Text style={s.ht}>Find a padel court in Qatar</Text><Text style={s.hs}>Book externally, open ranked games, and climb the Qatar leaderboard.</Text></Pressable>)}</ScrollView><SearchBar value={q} onChangeText={setQ}/><FilterChips items={['Tonight','Indoor','Outdoor','Lusail','Katara','Msheireb','Education City','Aspire']} active={f} onToggle={(x)=>setF(v=>v.includes(x)?v.filter(i=>i!==x):[...v,x])}/><Text style={s.h}>Available tonight</Text><ScrollView horizontal showsHorizontalScrollIndicator={false}>{filtered.map(c=><MotiView key={c.id} from={{opacity:0,translateY:8}} animate={{opacity:1,translateY:0}} style={s.card}><Pressable onPress={()=>router.push(`/court/${c.id}`)}><ImageWithFallback uri={c.image} style={s.img}/><Text style={s.n}>{c.name}</Text><Text style={s.m}>{c.area} • {c.indoor?'Indoor':'Outdoor'}</Text><View style={s.ts}>{c.timeSlots.map(t=><Text key={t} style={s.tc}>{t}</Text>)}</View><View style={s.am}>{['car','coffee','wifi'].map(i=><MaterialCommunityIcons key={i} name={i as any} size={16} color={colors.primary}/>)}</View></Pressable><View style={s.br}><View style={{flex:1}}><PremiumButton label='Book externally' onPress={()=>setSheet({type:'book',name:c.name})} variant='secondary'/></View><View style={{flex:1}}><PremiumButton label='Start ranked match' onPress={()=>setSheet({type:'ranked',name:c.name})}/></View></View></MotiView>)}</ScrollView><Text style={s.h}>Open games near you</Text><ScrollView horizontal>{openGames.map(g=><View key={g.id} style={s.open}><Text style={{fontWeight:'700'}}>{courts.find(c=>c.id===g.courtId)?.name}</Text><Text style={{color:colors.textSecondary}}>{g.date}</Text></View>)}</ScrollView><Modal visible={!!sheet} transparent animationType='slide'><Pressable style={s.back} onPress={()=>setSheet(null)}><BlurView intensity={20} style={s.sheet}><Text style={s.h}>{sheet?.name}</Text>{sheet?.type==='book'?<><PremiumButton label='Open Playtomic' onPress={()=>setSheet(null)}/><PremiumButton label='Club Website' onPress={()=>setSheet(null)} variant='secondary'/><PremiumButton label='Call Club' onPress={()=>setSheet(null)} variant='subtle'/></>:<><PremiumButton label='Invite players' onPress={()=>setSheet(null)}/><PremiumButton label='Open game' onPress={()=>setSheet(null)} variant='secondary'/><PremiumButton label='Submit result later' onPress={()=>setSheet(null)} variant='subtle'/></>}</BlurView></Pressable></Modal></ScrollView>}
-const s=StyleSheet.create({w:{flex:1,backgroundColor:'#F7F3F0'},heroWrap:{width:360,height:280,marginRight:10},hero:{width:'100%',height:'100%',borderRadius:22},g:{position:'absolute',left:0,right:0,bottom:0,height:140,borderRadius:22},ht:{position:'absolute',left:16,bottom:58,color:'#fff',fontWeight:'800',fontSize:28},hs:{position:'absolute',left:16,right:16,bottom:20,color:'#fff'},h:{fontSize:22,fontWeight:'800',color:'#171014'},card:{width:320,backgroundColor:'#fff',borderRadius:18,padding:12,marginRight:10},img:{height:170,borderRadius:14},n:{fontWeight:'800',fontSize:17,marginTop:8},m:{color:'#6F666B',marginTop:4},ts:{flexDirection:'row',gap:8,marginTop:8},tc:{backgroundColor:'#f3e8ee',paddingHorizontal:10,paddingVertical:5,borderRadius:20,color:'#660033'},am:{flexDirection:'row',gap:8,marginTop:8},br:{flexDirection:'row',gap:8,marginTop:10},open:{width:220,padding:12,backgroundColor:'#fff',borderRadius:12,marginRight:8},back:{flex:1,justifyContent:'flex-end',backgroundColor:'rgba(0,0,0,.35)'},sheet:{padding:20,backgroundColor:'#fff',borderTopLeftRadius:20,borderTopRightRadius:20,gap:10}})
+const filters = ['All', 'Tonight', 'Indoor', 'Outdoor', 'Lusail', 'Katara', 'Msheireb', 'Education City', 'Aspire'];
+const searchModes = ['Courts', 'Players', 'Coaches', 'Videos'] as const;
+
+export default function PlayScreen() {
+  const [query, setQuery] = useState('');
+  const [filter, setFilter] = useState('All');
+  const [mode, setMode] = useState<(typeof searchModes)[number]>('Courts');
+  const [sheetCourt, setSheetCourt] = useState<Court | null>(null);
+  const [sheetCoach, setSheetCoach] = useState<Coach | null>(null);
+  const [sheetVideo, setSheetVideo] = useState<VideoPost | null>(null);
+  const [selectedCoachSlot, setSelectedCoachSlot] = useState('');
+  const [selectedSlot, setSelectedSlot] = useState<AvailabilitySlot | null>(null);
+  const { courts, openGames, players, coaches, videos, currentUser, friendIds, addFriend, removeFriend, joinOpenGame, requestCoachSession, toggleVideoLike, toggleVideoSave } = useAppState();
+
+  const filteredCourts = useMemo(() => {
+    return courts.filter((court) => {
+      const text = `${court.name} ${court.area}`.toLowerCase();
+      const queryMatch = text.includes(query.trim().toLowerCase());
+      const filterMatch =
+        filter === 'All' ||
+        filter === 'Tonight' ||
+        (filter === 'Indoor' && court.indoor) ||
+        (filter === 'Outdoor' && !court.indoor) ||
+        court.area === filter;
+      return queryMatch && filterMatch;
+    });
+  }, [filter, query]);
+  const filteredPlayers = useMemo(() => {
+    const value = query.trim().toLowerCase();
+    return players
+      .filter((player) => player.id !== currentUser.id)
+      .filter((player) => !value || `${player.name} ${player.username} ${player.club} ${player.level}`.toLowerCase().includes(value))
+      .slice(0, 8);
+  }, [currentUser.id, players, query]);
+  const filteredCoaches = useMemo(() => {
+    const value = query.trim().toLowerCase();
+    return coaches.filter((coach) => !value || `${coach.name} ${coach.specialty} ${coach.area}`.toLowerCase().includes(value));
+  }, [coaches, query]);
+  const filteredVideos = useMemo(() => {
+    const value = query.trim().toLowerCase();
+    return videos.filter((video) => !value || `${video.title} ${video.creatorName} ${video.tag}`.toLowerCase().includes(value));
+  }, [query, videos]);
+
+  const openCourt = (id: string) => router.push(`/court/${id}`);
+  const startRanked = (courtId: string) => router.push({ pathname: '/(tabs)/submit', params: { courtId } });
+  const openBookingSheet = (court: Court) => {
+    setSheetCourt(court);
+    setSelectedSlot(court.availabilitySlots.find((slot) => slot.status !== 'full') || null);
+  };
+  const openExternalBooking = async () => {
+    if (!sheetCourt) return;
+    await Linking.openURL(sheetCourt.bookingUrl);
+    setSheetCourt(null);
+  };
+  const openCourtLink = async (url?: string) => {
+    if (!url) return;
+    await Linking.openURL(url);
+    setSheetCourt(null);
+  };
+
+  return (
+    <ScrollView style={styles.screen} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <HeroCarousel courts={courts} />
+      <CollapsibleSection title="Quick Actions" action="Challenge, train, submit, watch" defaultOpen>
+        <View style={styles.quickGrid}>
+          <FloatingActionCard dark title="Create Challenge" meta="Private or public" icon="sword-cross" onPress={() => router.push('/(tabs)/challenges')} />
+          <FloatingActionCard title="Find Players" meta="Search rivals" icon="account-search-outline" onPress={() => setMode('Players')} />
+          <FloatingActionCard title="Submit Match" meta="Proof + confirm" icon="clipboard-check-outline" onPress={() => router.push('/(tabs)/submit')} />
+        </View>
+        <View style={styles.quickGrid}>
+          <FloatingActionCard title="Find Coach" meta="Book locally" icon="whistle-outline" onPress={() => setMode('Coaches')} />
+          <FloatingActionCard title="Watch Clips" meta="Tips & highlights" icon="play-circle-outline" onPress={() => setMode('Videos')} />
+        </View>
+      </CollapsibleSection>
+      <View style={styles.modeRow}>
+        {searchModes.map((item) => (
+          <Pressable key={item} onPress={() => setMode(item)} style={({ pressed }) => [styles.modeChip, mode === item && styles.modeActive, pressed && styles.chipPressed]}>
+            <Text style={[styles.modeText, mode === item && styles.modeTextActive]}>{item}</Text>
+          </Pressable>
+        ))}
+      </View>
+      <SearchBar value={query} onChangeText={setQuery} placeholder={mode === 'Courts' ? 'Search courts or areas' : mode === 'Players' ? 'Search players, usernames, areas' : mode === 'Coaches' ? 'Search coaches or specialties' : 'Search clips, creators, tags'} />
+      {mode === 'Courts' ? <FilterChips items={filters} active={filter} onChange={setFilter} /> : null}
+
+      <View style={styles.networkPanel}>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.panelKicker}>Your Qatar ladder</Text>
+          <Text style={styles.panelTitle}>#{currentUser.rank} · {currentUser.rating} rating</Text>
+          <Text style={styles.panelCopy}>{currentUser.streak} match streak · {winRate(currentUser.wins, currentUser.losses)}% win rate · {friendIds.length} friends ready</Text>
+        </View>
+        <View style={styles.wallet}>
+          <Text style={styles.walletValue}>{friendIds.length}</Text>
+          <Text style={styles.walletLabel}>friends</Text>
+        </View>
+      </View>
+
+      <CollapsibleSection title="Courts Available Tonight" action={`${filteredCourts.length} courts`} defaultOpen>
+        {filteredCourts.length ? (
+          <HorizontalCardRail>
+            {filteredCourts.slice(0, 6).map((court) => (
+              <CourtCard key={court.id} court={court} onOpen={() => openCourt(court.id)} onBook={() => openBookingSheet(court)} onStartRanked={() => startRanked(court.id)} />
+            ))}
+          </HorizontalCardRail>
+        ) : (
+          <EmptyState title="No courts found" body="Try another area or clear the search." />
+        )}
+      </CollapsibleSection>
+
+      <CollapsibleSection title="Players Ready Tonight" action={`${filteredPlayers.length} found`} defaultOpen={mode === 'Players'}>
+        <HorizontalCardRail>
+          {filteredPlayers.map((player) => {
+            const isFriend = friendIds.includes(player.id);
+            return (
+              <Pressable key={player.id} onPress={() => router.push(`/player/${player.id}`)} style={({ pressed }) => [styles.playerCard, pressed && styles.quickPressed]}>
+                <View style={styles.playerAvatar}>
+                  <Text style={styles.playerInitials}>{player.name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</Text>
+                </View>
+                <Text numberOfLines={1} style={styles.playerName}>{player.name}</Text>
+                <Text style={styles.playerMeta}>{player.level} - {player.status === 'playingTonight' ? 'playing tonight' : player.status}</Text>
+                <View style={styles.playerActions}>
+                  <PremiumButton label={isFriend ? 'Friend' : 'Add'} icon={isFriend ? 'account-check' : 'account-plus-outline'} variant={isFriend ? 'subtle' : 'secondary'} onPress={() => (isFriend ? removeFriend(player.id) : addFriend(player.id))} style={{ flex: 1 }} />
+                  <PremiumButton label="Challenge" icon="sword-cross" onPress={() => router.push(`/player/${player.id}`)} style={{ flex: 1 }} />
+                </View>
+              </Pressable>
+            );
+          })}
+        </HorizontalCardRail>
+      </CollapsibleSection>
+
+      <CollapsibleSection title="Open Games Near You" action={`${openGames.length} open`}>
+        <View style={styles.darkBand}>
+        <Text style={styles.darkKicker}>Open match energy</Text>
+        <Text style={styles.darkTitle}>Open Games Near You</Text>
+        <HorizontalCardRail>
+          {openGames.map((game) => {
+            const court = courts.find((item) => item.id === game.courtId) || courts[0];
+            return (
+              <OpenGameCard
+                key={game.id}
+                game={game}
+                court={court}
+                players={players}
+                onJoin={() => joinOpenGame(game.id)}
+              />
+            );
+          })}
+        </HorizontalCardRail>
+        </View>
+      </CollapsibleSection>
+
+      <CollapsibleSection title="Coaching Picks" action={`${filteredCoaches.length} coaches`} defaultOpen={mode === 'Coaches'}>
+        <HorizontalCardRail>
+          {filteredCoaches.map((coach) => (
+            <CoachCard key={coach.id} coach={coach} onOpen={() => { setSelectedCoachSlot(coach.availableSlots[0] || 'Next available'); setSheetCoach(coach); }} onRequest={() => requestCoachSession(coach.id, coach.availableSlots[0] || 'Next available')} />
+          ))}
+        </HorizontalCardRail>
+      </CollapsibleSection>
+
+      <CollapsibleSection title="Video Highlights" action={`${filteredVideos.length} clips`} defaultOpen={mode === 'Videos'}>
+        <HorizontalCardRail>
+          {filteredVideos.map((video) => (
+            <VideoCard key={video.id} video={video} onOpen={() => setSheetVideo(video)} />
+          ))}
+        </HorizontalCardRail>
+      </CollapsibleSection>
+
+      <CollapsibleSection title="Top Courts This Week">
+        <View style={styles.stack}>
+          {courts.slice(0, 5).map((court) => (
+            <CourtCard key={court.id} compact court={court} onOpen={() => openCourt(court.id)} onBook={() => openBookingSheet(court)} onStartRanked={() => startRanked(court.id)} />
+          ))}
+        </View>
+      </CollapsibleSection>
+
+      <ActionSheet visible={!!sheetCourt} title="Book externally" subtitle={sheetCourt ? `${sheetCourt.name} accepts bookings through ${sheetCourt.externalBooking}.` : undefined} onClose={() => setSheetCourt(null)}>
+        {sheetCourt ? (
+          <>
+            <Text style={styles.sheetText}>{sheetCourt.priceRange}. Booking is completed externally with the venue.</Text>
+            <TimeSlotChips slots={sheetCourt.availabilitySlots} selectedId={selectedSlot?.id} onSelect={setSelectedSlot} />
+            <PremiumButton label={selectedSlot ? `Open venue for ${selectedSlot.label}` : 'Open venue booking'} icon="open-in-new" onPress={openExternalBooking} />
+            <View style={styles.sheetActions}>
+              <PremiumButton label="Instagram" variant="secondary" icon="instagram" onPress={() => openCourtLink(sheetCourt.instagramUrl)} style={{ flex: 1 }} />
+              <PremiumButton label="Maps" variant="subtle" icon="map-marker-radius-outline" onPress={() => openCourtLink(sheetCourt.mapsUrl)} style={{ flex: 1 }} />
+            </View>
+            <PremiumButton label="Start ranked match instead" variant="secondary" icon="trophy-outline" onPress={() => startRanked(sheetCourt.id)} />
+          </>
+        ) : null}
+      </ActionSheet>
+
+      <ActionSheet visible={!!sheetCoach} title={sheetCoach?.name || 'Coach'} subtitle={sheetCoach ? `${sheetCoach.specialty} - ${sheetCoach.priceLabel}` : undefined} onClose={() => setSheetCoach(null)}>
+        {sheetCoach ? (
+          <>
+            <Text style={styles.sheetText}>{sheetCoach.bio}</Text>
+            <View style={styles.selector}>
+              {sheetCoach.availableSlots.map((slot) => (
+                <Pressable key={slot} onPress={() => setSelectedCoachSlot(slot)} style={({ pressed }) => [styles.slotChoice, selectedCoachSlot === slot && styles.slotActive, pressed && styles.chipPressed]}>
+                  <Text style={[styles.slotText, selectedCoachSlot === slot && styles.slotTextActive]}>{slot}</Text>
+                </Pressable>
+              ))}
+            </View>
+            <PremiumButton label={sheetCoach.requested ? 'Session requested' : 'Request session'} icon="calendar-check" onPress={() => { requestCoachSession(sheetCoach.id, selectedCoachSlot); setSheetCoach(null); }} />
+          </>
+        ) : null}
+      </ActionSheet>
+
+      <ActionSheet visible={!!sheetVideo} title={sheetVideo?.title || 'Video'} subtitle={sheetVideo ? `${sheetVideo.creatorName} - ${sheetVideo.duration}` : undefined} onClose={() => setSheetVideo(null)}>
+        {sheetVideo ? (
+          <>
+            <Text style={styles.sheetText}>{sheetVideo.description}</Text>
+            <View style={styles.sheetActions}>
+              <PremiumButton label={sheetVideo.liked ? 'Liked' : 'Like'} icon="heart-outline" onPress={() => toggleVideoLike(sheetVideo.id)} style={{ flex: 1 }} />
+              <PremiumButton label={sheetVideo.saved ? 'Saved' : 'Save'} variant="secondary" icon="bookmark-outline" onPress={() => toggleVideoSave(sheetVideo.id)} style={{ flex: 1 }} />
+            </View>
+            <PremiumButton label="Comment preview" variant="subtle" icon="comment-outline" onPress={() => setSheetVideo(null)} />
+          </>
+        ) : null}
+      </ActionSheet>
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  screen: { flex: 1, backgroundColor: colors.background },
+  content: { padding: spacing.md, gap: 24, paddingBottom: 104 },
+  horizontal: { gap: 12, paddingRight: spacing.md },
+  stack: { gap: 14 },
+  quickGrid: { flexDirection: 'row', gap: 10 },
+  quickPressed: { transform: [{ scale: 0.975 }, { translateY: 1 }], shadowOpacity: 0.05 },
+  modeRow: { flexDirection: 'row', padding: 4, borderRadius: radius.pill, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: colors.border },
+  modeChip: { flex: 1, alignItems: 'center', paddingVertical: 9, borderRadius: radius.pill },
+  modeActive: { backgroundColor: colors.primary },
+  chipPressed: { transform: [{ scale: 0.96 }, { translateY: 1 }] },
+  modeText: { color: colors.textSecondary, fontWeight: '900' },
+  modeTextActive: { color: '#FFFFFF' },
+  playerCard: { width: 210, backgroundColor: '#FFFFFF', borderRadius: radius.lg, padding: 14, borderWidth: 1, borderColor: colors.border, gap: 9, shadowColor: '#2A1621', shadowOpacity: 0.08, shadowRadius: 12, shadowOffset: { width: 0, height: 7 }, elevation: 4 },
+  playerAvatar: { width: 54, height: 54, borderRadius: 27, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.softMaroon, borderWidth: 1, borderColor: colors.border },
+  playerInitials: { color: colors.primary, fontWeight: '900' },
+  playerName: { color: colors.textPrimary, fontWeight: '900', fontSize: 16 },
+  playerMeta: { color: colors.textSecondary, fontWeight: '800', fontSize: 12 },
+  playerActions: { flexDirection: 'row', gap: 8 },
+  sheetText: { color: colors.textSecondary, fontWeight: '700', lineHeight: 20 },
+  sheetActions: { flexDirection: 'row', gap: 8 },
+  selector: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  slotChoice: { paddingHorizontal: 12, paddingVertical: 9, borderRadius: radius.pill, borderWidth: 1, borderColor: colors.border, backgroundColor: '#FFFFFF' },
+  slotActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+  slotText: { color: colors.textSecondary, fontWeight: '900' },
+  slotTextActive: { color: '#FFFFFF' },
+  darkBand: { marginHorizontal: -spacing.md, paddingVertical: 20, paddingLeft: spacing.md, backgroundColor: colors.darkSection, gap: 12 },
+  darkKicker: { color: '#F2DCE7', fontWeight: '900', fontSize: 12, textTransform: 'uppercase' },
+  darkTitle: { color: '#FFFFFF', fontSize: 23, fontWeight: '900' },
+  networkPanel: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16, borderRadius: radius.xl, backgroundColor: colors.darkSection, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' },
+  panelKicker: { color: '#E7CAD7', fontWeight: '900', fontSize: 12, textTransform: 'uppercase' },
+  panelTitle: { color: '#FFFFFF', fontWeight: '900', fontSize: 24, marginTop: 5 },
+  panelCopy: { color: '#F7EEF2', fontWeight: '700', lineHeight: 19, marginTop: 5 },
+  wallet: { width: 82, height: 82, borderRadius: 41, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.court, borderWidth: 4, borderColor: 'rgba(255,255,255,0.16)' },
+  walletValue: { color: '#FFFFFF', fontWeight: '900', fontSize: 19 },
+  walletLabel: { color: '#DCEFE8', fontWeight: '900', fontSize: 11, marginTop: 1 },
+});

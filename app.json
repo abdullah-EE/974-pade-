@@ -6,6 +6,23 @@
     "version": "0.1.0",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#3A001D"
+    },
+    "ios": {
+      "bundleIdentifier": "qa.974padel.app",
+      "supportsTablet": false
+    },
+    "android": {
+      "package": "qa.974padel.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#660033"
+      }
+    },
     "plugins": ["expo-router"]
   }
 }

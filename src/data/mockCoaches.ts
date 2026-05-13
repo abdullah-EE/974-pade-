@@ -1,0 +1,47 @@
+import { Coach } from '@/types/Coach';
+import { images } from './images';
+
+export const mockCoaches: Coach[] = [
+  {
+    id: 'coach1',
+    name: 'Karim Haddad',
+    heroImageUrl: images.courts[2] as string,
+    specialty: 'Glass-wall defense',
+    level: 'Advanced',
+    area: 'Education City',
+    courtId: 'c3',
+    rating: 4.9,
+    priceLabel: 'QAR 220/session',
+    bio: 'Technical padel coach focused on wall reads, transition movement, and ranked match preparation.',
+    specialties: ['Wall defense', 'Serve patterns', 'Ranked match tactics'],
+    availableSlots: ['Tonight, 7:30 PM', 'Tomorrow, 6:00 PM', 'Friday, 10:00 AM'],
+  },
+  {
+    id: 'coach2',
+    name: 'Diego Martinez',
+    heroImageUrl: images.courts[4] as string,
+    specialty: 'Aggressive net play',
+    level: 'Advanced',
+    area: 'Lusail',
+    courtId: 'c5',
+    rating: 4.8,
+    priceLabel: 'QAR 250/session',
+    bio: 'Competition-focused sessions for players who want faster decisions at net and cleaner finishing shots.',
+    specialties: ['Volleys', 'Bandeja', 'Match tempo'],
+    availableSlots: ['Tonight, 9:00 PM', 'Tomorrow, 8:30 PM', 'Saturday, 5:00 PM'],
+  },
+  {
+    id: 'coach3',
+    name: 'Omar Al-Kuwari',
+    heroImageUrl: images.courts[8] as string,
+    specialty: 'Beginner to club-ready',
+    level: 'Intermediate',
+    area: 'Katara',
+    courtId: 'c9',
+    rating: 4.7,
+    priceLabel: 'QAR 180/session',
+    bio: 'Friendly progression plan for new players building confidence, positioning, and match rhythm.',
+    specialties: ['Footwork', 'Positioning', 'Game basics'],
+    availableSlots: ['Tomorrow, 7:00 PM', 'Thursday, 8:00 PM', 'Saturday, 9:30 AM'],
+  },
+];

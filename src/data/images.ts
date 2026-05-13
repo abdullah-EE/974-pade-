@@ -1,17 +1,18 @@
 export const images = {
   courts: [
-    'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?auto=format&fit=crop&w=1400&q=80',
-    'https://images.unsplash.com/photo-1612872087720-bb876e2e67d1?auto=format&fit=crop&w=1400&q=80',
-    'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=1400&q=80',
-    'https://images.unsplash.com/photo-1602211844066-d3bb556e983b?auto=format&fit=crop&w=1400&q=80',
-    'https://images.unsplash.com/photo-1622279457338-a45ccf0555c3?auto=format&fit=crop&w=1400&q=80',
+    'https://lapelota.qa/wp-content/uploads/2025/03/DSC03776.jpg',
+    'https://lapelota.qa/wp-content/uploads/2025/03/DSC03775.jpg',
+    'https://i0.wp.com/thedome.qa/wp-content/uploads/2024/02/DR505577-scaled.jpg?fit=683%2C1024&ssl=1',
+    'https://lapelota.qa/wp-content/uploads/2025/03/DSC03694.jpg',
+    'https://thepadelist.com/assets/images/padel-court-bg.webp',
+    'https://lapelota.qa/wp-content/uploads/2025/03/DSC03623.jpg',
+    'https://lapelota.qa/wp-content/uploads/2025/03/DSC03475-1.jpg',
+    'https://i0.wp.com/thedome.qa/wp-content/uploads/2024/03/DR505219-scaled.jpg?fit=683%2C1024&ssl=1',
+    'https://lapelota.qa/wp-content/uploads/2025/03/DSC03639.jpg',
+    'https://lapelota.qa/wp-content/uploads/2025/03/DSC03652.jpg',
   ],
   players: [
-    'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80',
-    'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=400&q=80',
-    'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80',
-    'https://images.unsplash.com/photo-1542909168-82c3e7fdca5c?auto=format&fit=crop&w=400&q=80',
-    'https://images.unsplash.com/photo-1542178243-bc20204b769f?auto=format&fit=crop&w=400&q=80',
+    '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
   ],
-  proof: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=1200&q=80'
+  proof: 'https://lapelota.qa/wp-content/uploads/2025/03/DSC05803.jpg'
 };

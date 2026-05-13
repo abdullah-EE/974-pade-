@@ -1,7 +1,76 @@
-import { useState } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { players } from '@/data/mockData';
-import { colors } from '@/theme/tokens';
+import { useMemo, useState } from 'react';
+import { router } from 'expo-router';
+import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { CollapsibleSection } from '@/components/common/CollapsibleSection';
+import { FilterChips } from '@/components/common/FilterChips';
+import { RankingPodium, RankingRow } from '@/components/common/Ranking';
+import { HorizontalCardRail } from '@/components/common/HorizontalCardRail';
+import { useAppState } from '@/state/AppState';
+import { colors, radius, spacing } from '@/theme/tokens';
 
-export default function Leaderboard(){const [active,setActive]=useState('Overall');return <ScrollView style={{flex:1,backgroundColor:colors.background,padding:14}}><Text style={s.h}>Qatar Rankings</Text><View style={s.podium}>{players.slice(0,3).map((p,i)=><View key={p.id} style={[s.p,i===0&&s.p1]}><Text style={s.badge}>#{p.rank}</Text><Image source={{uri:p.avatar}} style={s.a}/><Text style={s.n}>{p.name}</Text><Text style={s.r}>{p.rating}</Text></View>)}</View><ScrollView horizontal showsHorizontalScrollIndicator={false}>{['Overall','This Week','Club','Beginner','Intermediate','Advanced'].map(f=><Pressable key={f} onPress={()=>setActive(f)} style={[s.chip,active===f&&s.ca]}><Text style={{color:active===f?'#fff':colors.textSecondary,fontWeight:'600'}}>{f}</Text></Pressable>)}</ScrollView>{players.map(pl=><View key={pl.id} style={s.row}><Text style={s.rank}>#{pl.rank}</Text><Image source={{uri:pl.avatar}} style={s.ra}/><Text numberOfLines={1} style={{flex:1,fontWeight:'600'}}>{pl.name}</Text><Text style={s.rate}>{pl.rating}</Text><Text style={{color:pl.movement>0?'#1f8a5f':'#ad3d4d',width:34}}>{pl.movement>0?`↑${pl.movement}`:`↓${Math.abs(pl.movement)}`}</Text><Text style={s.v}>{pl.verified?'✓':'-'}</Text></View>)}</ScrollView>}
-const s=StyleSheet.create({h:{fontSize:26,fontWeight:'800',marginBottom:12,color:colors.textPrimary},podium:{flexDirection:'row',gap:10,marginBottom:14},p:{backgroundColor:'#fff',padding:12,borderRadius:14,alignItems:'center',flex:1},p1:{borderWidth:2,borderColor:colors.primary},badge:{backgroundColor:'#f1e7ec',paddingHorizontal:9,paddingVertical:4,borderRadius:999,color:colors.primary,fontWeight:'700'},a:{width:68,height:68,borderRadius:34,marginTop:8},n:{marginTop:8,fontWeight:'700',fontSize:12,textAlign:'center'},r:{color:colors.textSecondary,fontWeight:'700'},chip:{padding:8,borderRadius:20,backgroundColor:'#fff',marginRight:8,marginBottom:12},ca:{backgroundColor:colors.primary},row:{flexDirection:'row',alignItems:'center',backgroundColor:'#fff',padding:10,borderRadius:12,marginBottom:8,gap:8},rank:{width:35,color:colors.textSecondary},ra:{width:34,height:34,borderRadius:17},rate:{fontWeight:'700',width:56},v:{color:colors.primary,fontWeight:'700'}})
+const filters = ['Overall', 'This Week', 'Friends', 'Club', 'Beginner', 'Intermediate', 'Advanced'];
+
+export default function RankingsScreen() {
+  const [filter, setFilter] = useState('Overall');
+  const [query, setQuery] = useState('');
+  const { players, currentUser, friendIds, addFriend, removeFriend } = useAppState();
+  const ranked = useMemo(() => {
+    const list = [...players];
+    const filtered = list.filter((player) => `${player.name} ${player.username} ${player.club}`.toLowerCase().includes(query.trim().toLowerCase()));
+    if (filter === 'This Week') return filtered.sort((a, b) => b.movement - a.movement);
+    if (filter === 'Friends') return filtered.filter((player) => friendIds.includes(player.id) || player.id === currentUser.id);
+    if (filter === 'Club') return filtered.filter((player) => player.club === currentUser.club);
+    if (filter === 'Beginner' || filter === 'Intermediate' || filter === 'Advanced') return filtered.filter((player) => player.level === filter);
+    return filtered.sort((a, b) => a.rank - b.rank);
+  }, [currentUser.club, currentUser.id, filter, friendIds, players, query]);
+
+  return (
+    <ScrollView style={styles.screen} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <View>
+        <Text style={styles.kicker}>Verified Qatar leaderboard</Text>
+        <Text style={styles.title}>Rankings</Text>
+      </View>
+      <CollapsibleSection title="Top 3 Podium" action="Verified leaders" defaultOpen>
+        <RankingPodium players={players.slice(0, 3)} onOpen={(id) => router.push(`/player/${id}`)} />
+      </CollapsibleSection>
+      <TextInput value={query} onChangeText={setQuery} placeholder="Search players by name, handle, or club" placeholderTextColor={colors.textSecondary} style={styles.search} />
+      <CollapsibleSection title="Weekly Movers" action="Fastest climbs">
+        <HorizontalCardRail>
+          {[...players].sort((a, b) => b.movement - a.movement).slice(0, 6).map((player) => (
+            <View key={player.id} style={styles.mover}>
+              <Text numberOfLines={1} style={styles.moverName}>{player.name}</Text>
+              <Text style={styles.moverMeta}>+{Math.max(0, player.movement)} places</Text>
+            </View>
+          ))}
+        </HorizontalCardRail>
+      </CollapsibleSection>
+      <FilterChips items={filters} active={filter} onChange={setFilter} />
+      <CollapsibleSection title={filter === 'Friends' ? 'Friends Ranking' : filter === 'Club' ? 'Club Ranking' : 'Top 100'} action={filter} defaultOpen>
+        <View style={styles.rows}>
+          {ranked.map((player) => (
+            <RankingRow
+              key={player.id}
+              player={player}
+              isFriend={friendIds.includes(player.id)}
+              onFriendToggle={() => (friendIds.includes(player.id) ? removeFriend(player.id) : addFriend(player.id))}
+              onOpen={() => router.push(`/player/${player.id}`)}
+            />
+          ))}
+        </View>
+      </CollapsibleSection>
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  screen: { flex: 1, backgroundColor: colors.background },
+  content: { padding: spacing.md, gap: 22, paddingBottom: 104 },
+  kicker: { color: colors.primary, fontWeight: '900', textTransform: 'uppercase', fontSize: 12 },
+  title: { color: colors.textPrimary, fontSize: 34, fontWeight: '900', marginTop: 3 },
+  search: { minHeight: 50, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: colors.border, borderRadius: radius.pill, paddingHorizontal: 16, color: colors.textPrimary, fontWeight: '800' },
+  movers: { gap: 10, paddingRight: spacing.md },
+  mover: { width: 154, backgroundColor: colors.darkSection, borderRadius: 16, padding: 14 },
+  moverName: { color: '#FFFFFF', fontWeight: '900' },
+  moverMeta: { color: '#F2DCE7', marginTop: 6, fontWeight: '800' },
+  rows: { gap: 9 },
+});

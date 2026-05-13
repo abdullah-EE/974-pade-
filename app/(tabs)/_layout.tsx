@@ -1,5 +1,7 @@
 import { Tabs } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
+import { StyleSheet } from 'react-native';
 import { colors } from '@/theme/tokens';
 
 const icon =
@@ -14,24 +16,28 @@ export default function TabsLayout() {
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: '#8f868b',
+        tabBarInactiveTintColor: '#8F868B',
+        tabBarLabelStyle: { fontSize: 11, fontWeight: '800', marginTop: 2 },
         tabBarStyle: {
-          backgroundColor: '#fff',
-          borderTopColor: '#efe5e9',
-          height: 72,
-          paddingBottom: 10,
+          backgroundColor: 'rgba(255,253,251,0.94)',
+          borderTopColor: '#EFE5E9',
+          height: 76,
+          paddingBottom: 12,
           paddingTop: 8,
-          shadowColor: '#2a1621',
-          shadowOpacity: 0.1,
-          shadowRadius: 10,
+          shadowColor: '#2A1621',
+          shadowOpacity: 0.12,
+          shadowRadius: 16,
+          shadowOffset: { width: 0, height: -6 },
+          elevation: 12,
         },
+        tabBarBackground: () => <BlurView tint="light" intensity={72} style={StyleSheet.absoluteFill} />,
       }}
     >
-      <Tabs.Screen name="courts" options={{ title: 'Play', tabBarIcon: icon('tennis') }} />
+      <Tabs.Screen name="courts" options={{ title: 'Play', tabBarIcon: icon('stadium') }} />
       <Tabs.Screen name="leaderboard" options={{ title: 'Rankings', tabBarIcon: icon('podium') }} />
-      <Tabs.Screen name="submit" options={{ title: 'Submit', tabBarIcon: icon('plus-circle-outline') }} />
-      <Tabs.Screen name="challenges" options={{ title: 'Challenges', tabBarIcon: icon('lightning-bolt-outline') }} />
-      <Tabs.Screen name="profile" options={{ title: 'Profile', tabBarIcon: icon('account-outline') }} />
+      <Tabs.Screen name="submit" options={{ title: 'Submit', tabBarIcon: icon('clipboard-check-outline') }} />
+      <Tabs.Screen name="challenges" options={{ title: 'Challenges', tabBarIcon: icon('sword-cross') }} />
+      <Tabs.Screen name="profile" options={{ title: 'Profile', tabBarIcon: icon('account-circle-outline') }} />
       <Tabs.Screen name="index" options={{ href: null }} />
     </Tabs>
   );
