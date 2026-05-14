@@ -3,6 +3,7 @@ import { mockCoaches } from '@/data/mockCoaches';
 import { mockVideos } from '@/data/mockVideos';
 import { mockCosmetics, mockWallet } from '@/data/mockWallet';
 import { challenges as initialChallenges, courts as initialCourts, matches as initialMatches, openGames as initialOpenGames, players as initialPlayers } from '@/data/mockData';
+import { tournaments as initialTournaments } from '@/data/mockTournaments';
 import { accountService } from '@/services/accountService';
 import { challengeService } from '@/services/challengeService';
 import { friendService } from '@/services/friendService';
@@ -11,7 +12,7 @@ import { rankingService } from '@/services/rankingService';
 import { Coach } from '@/types/Coach';
 import { VideoPost } from '@/types/VideoPost';
 import { CosmeticItem, Wallet } from '@/types/Wallet';
-import { Area, Challenge, ChallengeStatus, Court, Level, LocalAccount, Match, MatchStatus, OpenGame, Player } from '@/types/models';
+import { Area, Challenge, ChallengeStatus, Conversation, Court, Level, LocalAccount, Match, MatchStatus, OpenGame, Player, TournamentEvent } from '@/types/models';
 import { canRunAction } from '@/utils/rateLimit';
 import { sanitizeText } from '@/utils/validation';
 
@@ -34,6 +35,8 @@ interface AppStateValue {
   openGames: OpenGame[];
   challenges: Challenge[];
   matches: Match[];
+  tournaments: TournamentEvent[];
+  conversations: Conversation[];
   coaches: Coach[];
   videos: VideoPost[];
   wallet: Wallet;
@@ -51,6 +54,10 @@ interface AppStateValue {
   updateChallenge: (id: string, status: ChallengeStatus) => void;
   addMatch: (match: Match) => void;
   updateMatchStatus: (id: string, status: MatchStatus) => void;
+  registerTournamentInterest: (id: string) => void;
+  submitTournamentMatch: (tournamentId: string, match: Match) => void;
+  submitFriendlyResult: (challengeId: string, score: string, winner?: Match['winner']) => Match | null;
+  sendConversationMessage: (participantId: string, text: string) => Conversation;
   requestCoachSession: (id: string, slot: string) => void;
   toggleVideoLike: (id: string) => void;
   toggleVideoSave: (id: string) => void;
@@ -93,6 +100,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [openGames, setOpenGames] = useState<OpenGame[]>(initialOpenGames);
   const [challenges, setChallenges] = useState<Challenge[]>(initialChallenges);
   const [matches, setMatches] = useState<Match[]>(initialMatches);
+  const [tournaments, setTournaments] = useState<TournamentEvent[]>(initialTournaments);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
   const [coaches, setCoaches] = useState<Coach[]>(mockCoaches);
   const [videos, setVideos] = useState<VideoPost[]>(mockVideos);
   const [wallet, setWallet] = useState<Wallet>(mockWallet);
@@ -257,7 +266,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       const remoteAction = status === 'Verified' ? matchService.confirmMatch(target, currentUser.id, players) : status === 'Disputed' ? matchService.disputeMatch(target, currentUser.id) : Promise.resolve(target);
       remoteAction.catch(() => undefined);
     }
-    if (status === 'Verified' && target && [...target.teamA, ...target.teamB].includes(currentUser.id) && canRunAction(`verified-credit-${id}`, 60 * 60 * 1000)) {
+    const rankingEligible = target?.rankingSource === 'tournament' || target?.rankingSource === 'approved_club_event';
+    if (status === 'Verified' && rankingEligible && target && [...target.teamA, ...target.teamB].includes(currentUser.id) && canRunAction(`verified-credit-${id}`, 60 * 60 * 1000)) {
       const delta = rankingService.previewDelta(players, target);
       const nextPlayer = rankingService.applyConfirmedMatch(currentUser, { ...target, status: 'Verified' }, delta);
       updateAccount({
@@ -272,6 +282,77 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
         transactions: [{ id: `tx-${Date.now()}`, userId: currentUser.id, amount: creditAmount, reason: nextPlayer.streak >= 3 ? 'winStreak' : 'verifiedMatch', createdAt: new Date().toISOString() }, ...next.transactions],
       }));
     }
+  };
+  const registerTournamentInterest = (id: string) => {
+    setTournaments((items) =>
+      items.map((item) => {
+        if (item.id !== id) return item;
+        const interestedPlayerIds = item.interestedPlayerIds.includes(currentUser.id) ? item.interestedPlayerIds : [...item.interestedPlayerIds, currentUser.id];
+        return { ...item, registered: true, interestedPlayerIds };
+      }),
+    );
+  };
+  const submitTournamentMatch = (tournamentId: string, match: Match) => {
+    const tournament = tournaments.find((item) => item.id === tournamentId);
+    addMatch({
+      ...match,
+      tournamentId,
+      rankingSource: tournament?.rankingSource || 'tournament',
+      friendlyStatsOnly: false,
+      verificationRequirements: ['Opponent confirmation', 'Proof photo', 'Admin review'],
+    });
+  };
+  const submitFriendlyResult = (challengeId: string, score: string, winner: Match['winner'] = 'A') => {
+    const challenge = challenges.find((item) => item.id === challengeId);
+    if (!challenge) return null;
+    const opponentIds = challenge.to === currentUser.id ? [challenge.from] : challenge.to === 'open' ? [] : [challenge.to];
+    const match: Match = {
+      id: `friendly-${Date.now()}`,
+      teamA: [currentUser.id],
+      teamB: opponentIds.length ? opponentIds : ['open'],
+      winner,
+      score: sanitizeText(score, 40),
+      courtId: challenge.courtId,
+      startsAt: challenge.startsAt,
+      ratingChange: 0,
+      status: 'Verified',
+      rankingSource: 'friendly',
+      friendlyStatsOnly: true,
+      verificationRequirements: ['Opponent confirmation'],
+    };
+    setMatches((items) => [match, ...items]);
+    setChallenges((items) => items.map((item) => (item.id === challengeId ? { ...item, status: 'completed' } : item)));
+    return match;
+  };
+  const sendConversationMessage = (participantId: string, text: string) => {
+    const clean = sanitizeText(text, 220) || 'Can you play this slot?';
+    const existing = conversations.find((conversation) => conversation.participantIds.includes(currentUser.id) && conversation.participantIds.includes(participantId));
+    const conversationId = existing?.id || `conv-${Date.now()}`;
+    const message = {
+      id: `msg-${Date.now()}`,
+      conversationId,
+      senderId: currentUser.id,
+      text: clean,
+      createdAt: new Date().toISOString(),
+    };
+    const nextConversation: Conversation = existing
+      ? { ...existing, messages: [...existing.messages, message] }
+      : {
+          id: conversationId,
+          participantIds: [currentUser.id, participantId],
+          messages: [
+            {
+              id: `msg-seed-${Date.now()}`,
+              conversationId,
+              senderId: participantId,
+              text: 'Send me the court and time before you lock it in.',
+              createdAt: new Date().toISOString(),
+            },
+            message,
+          ],
+        };
+    setConversations((items) => existing ? items.map((item) => (item.id === existing.id ? nextConversation : item)) : [nextConversation, ...items]);
+    return nextConversation;
   };
   const requestCoachSession = (id: string, slot: string) => {
     setCoaches((items) => items.map((coach) => (coach.id === id ? { ...coach, requested: true, availableSlots: coach.availableSlots.filter((item) => item !== slot) } : coach)));
@@ -340,7 +421,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     return video;
   };
 
-  const value = { account, currentUser, players, courts, openGames, challenges, matches, coaches, videos, wallet, cosmetics, activeCosmeticIds, friendIds, createAccount, loginAccount, logoutAccount, updateAccount, addFriend, removeFriend, joinOpenGame, createChallenge, updateChallenge, addMatch, updateMatchStatus, requestCoachSession, toggleVideoLike, toggleVideoSave, previewCosmetic, selectCosmetic, buyCosmetic, earnCredits, createCoachProfile, uploadVideo };
+  const value = { account, currentUser, players, courts, openGames, challenges, matches, tournaments, conversations, coaches, videos, wallet, cosmetics, activeCosmeticIds, friendIds, createAccount, loginAccount, logoutAccount, updateAccount, addFriend, removeFriend, joinOpenGame, createChallenge, updateChallenge, addMatch, updateMatchStatus, registerTournamentInterest, submitTournamentMatch, submitFriendlyResult, sendConversationMessage, requestCoachSession, toggleVideoLike, toggleVideoSave, previewCosmetic, selectCosmetic, buyCosmetic, earnCredits, createCoachProfile, uploadVideo };
 
   return <AppStateContext.Provider value={value}>{hydrated ? children : null}</AppStateContext.Provider>;
 }

@@ -20,6 +20,7 @@ export type AvailabilityStatus = 'available' | 'few-left' | 'full';
 export type CourtAvailabilityStatus = 'Available tonight' | 'Few slots left' | 'Almost full' | 'Fully booked';
 export type SubscriptionTier = 'Free' | 'Premium' | 'Pro';
 export type VerificationRequirement = 'Opponent confirmation' | 'Proof photo' | 'GPS check' | 'Admin review';
+export type RankingSource = 'tournament' | 'approved_club_event' | 'friendly';
 
 export interface AvailabilitySlot {
   id: string;
@@ -103,6 +104,41 @@ export interface Match {
   };
   verificationStatus?: 'pendingOpponent' | 'confirmed' | 'disputed';
   verificationRequirements?: VerificationRequirement[];
+  rankingSource?: RankingSource;
+  tournamentId?: string;
+  friendlyStatsOnly?: boolean;
+}
+
+export interface TournamentEvent {
+  id: string;
+  title: string;
+  clubName: string;
+  courtId: string;
+  startsAt: string;
+  timeLabel: string;
+  format: 'League' | 'Knockout' | 'Round robin' | 'Club event';
+  level: Level;
+  entryFeeLabel: string;
+  status: 'Open' | 'Filling fast' | 'Waitlist' | 'Running';
+  rankingSource: Exclude<RankingSource, 'friendly'>;
+  description: string;
+  interestedPlayerIds: string[];
+  registered?: boolean;
+}
+
+export interface ConversationMessage {
+  id: string;
+  conversationId: string;
+  senderId: string;
+  text: string;
+  createdAt: string;
+}
+
+export interface Conversation {
+  id: string;
+  participantIds: string[];
+  challengeId?: string;
+  messages: ConversationMessage[];
 }
 
 export interface OpenGame {

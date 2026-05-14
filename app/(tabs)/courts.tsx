@@ -16,18 +16,17 @@ import { OpenGameCard } from '@/components/common/OpenGameCard';
 import { PremiumButton } from '@/components/common/PremiumButton';
 import { SearchBar } from '@/components/common/SearchBar';
 import { ScreenTransitionWrapper } from '@/components/common/ScreenTransitionWrapper';
-import { TimeSlotChips } from '@/components/common/TimeSlotChips';
 import { VideoCard } from '@/components/common/VideoCard';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { useAppState } from '@/state/AppState';
 import { colors, radius, spacing } from '@/theme/tokens';
 import { centeredContent } from '@/theme/layout';
-import { AvailabilitySlot, Court } from '@/types/models';
+import { Court } from '@/types/models';
 import { Coach } from '@/types/Coach';
 import { VideoPost } from '@/types/VideoPost';
 import { winRate } from '@/utils/format';
 
-const filters = ['All', 'Tonight', 'Indoor', 'Outdoor', 'Lusail', 'Katara', 'Msheireb', 'Education City', 'Aspire'];
+const filters = ['All', 'Indoor', 'Outdoor', 'Lusail', 'Katara', 'Msheireb', 'Education City', 'Aspire'];
 const searchModes = ['Courts', 'Players', 'Coaches', 'Videos'] as const;
 
 export default function PlayScreen() {
@@ -39,8 +38,7 @@ export default function PlayScreen() {
   const [sheetCoach, setSheetCoach] = useState<Coach | null>(null);
   const [sheetVideo, setSheetVideo] = useState<VideoPost | null>(null);
   const [selectedCoachSlot, setSelectedCoachSlot] = useState('');
-  const [selectedSlot, setSelectedSlot] = useState<AvailabilitySlot | null>(null);
-  const { courts, openGames, players, coaches, videos, currentUser, friendIds, addFriend, removeFriend, joinOpenGame, requestCoachSession, toggleVideoLike, toggleVideoSave } = useAppState();
+  const { courts, openGames, players, coaches, videos, tournaments, currentUser, friendIds, addFriend, removeFriend, joinOpenGame, requestCoachSession, toggleVideoLike, toggleVideoSave, registerTournamentInterest } = useAppState();
 
   const filteredCourts = useMemo(() => {
     return courts.filter((court) => {
@@ -48,7 +46,6 @@ export default function PlayScreen() {
       const queryMatch = text.includes(debouncedQuery.trim().toLowerCase());
       const filterMatch =
         filter === 'All' ||
-        filter === 'Tonight' ||
         (filter === 'Indoor' && court.indoor) ||
         (filter === 'Outdoor' && !court.indoor) ||
         court.area === filter;
@@ -72,10 +69,9 @@ export default function PlayScreen() {
   }, [debouncedQuery, videos]);
 
   const openCourt = (id: string) => router.push(`/court/${id}`);
-  const startRanked = (courtId: string) => router.push({ pathname: '/(tabs)/submit', params: { courtId } });
+  const startOfficial = (_courtId: string) => router.push('/(tabs)/tournaments');
   const openBookingSheet = (court: Court) => {
     setSheetCourt(court);
-    setSelectedSlot(court.availabilitySlots.find((slot) => slot.status !== 'full') || null);
   };
   const openExternalBooking = async () => {
     if (!sheetCourt) return;
@@ -92,13 +88,25 @@ export default function PlayScreen() {
     <ScreenTransitionWrapper>
     <ScrollView style={styles.screen} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <HeroCarousel courts={courts} />
-      <CollapsibleSection title="Quick Actions" action="Challenge, players, coaches, clips" defaultOpen>
+      <CollapsibleSection title="Upcoming Tournaments" action="Official ranking" defaultOpen>
+        <HorizontalCardRail>
+          {tournaments.slice(0, 3).map((event) => (
+            <Pressable key={event.id} onPress={() => router.push('/(tabs)/tournaments')} style={({ pressed }) => [styles.tournamentCard, pressed && styles.quickPressed]}>
+              <Text style={styles.tournamentKicker}>{event.level} - {event.timeLabel}</Text>
+              <Text numberOfLines={2} style={styles.tournamentTitle}>{event.title}</Text>
+              <Text numberOfLines={1} style={styles.tournamentMeta}>{event.clubName} - {event.entryFeeLabel}</Text>
+              <PremiumButton label={event.status === 'Open' ? 'Register' : 'Notify me'} icon="bell-outline" onPress={() => registerTournamentInterest(event.id)} />
+            </Pressable>
+          ))}
+        </HorizontalCardRail>
+      </CollapsibleSection>
+      <CollapsibleSection title="Quick Actions" action="Tournaments, players, friendly play" defaultOpen>
         <View style={styles.quickGrid}>
-          <FloatingActionCard dark title="Create Challenge" meta="Private or public" icon="sword-cross" onPress={() => router.push('/(tabs)/challenges')} />
+          <FloatingActionCard dark title="Friendly Play" meta="Open game or invite" icon="account-group-outline" onPress={() => router.push('/(tabs)/play')} />
           <FloatingActionCard title="Find Players" meta="Search rivals" icon="account-search-outline" onPress={() => setMode('Players')} />
         </View>
         <View style={styles.quickGrid}>
-          <FloatingActionCard title="Submit Match" meta="Proof + confirm" icon="clipboard-check-outline" onPress={() => router.push('/(tabs)/submit')} />
+          <FloatingActionCard title="Tournaments" meta="Official ranking" icon="trophy-outline" onPress={() => router.push('/(tabs)/tournaments')} />
           <FloatingActionCard title="Find Coach" meta="Book locally" icon="whistle-outline" onPress={() => setMode('Coaches')} />
         </View>
       </CollapsibleSection>
@@ -114,9 +122,9 @@ export default function PlayScreen() {
 
       <View style={styles.networkPanel}>
         <View style={{ flex: 1 }}>
-          <Text style={styles.panelKicker}>Your Qatar ladder</Text>
+          <Text style={styles.panelKicker}>Official ranking</Text>
           <Text style={styles.panelTitle}>#{currentUser.rank} - {currentUser.rating} rating</Text>
-          <Text style={styles.panelCopy}>{currentUser.streak} match streak - {winRate(currentUser.wins, currentUser.losses)}% win rate - {friendIds.length} friends ready</Text>
+          <Text style={styles.panelCopy}>Tournament and approved club-event results move ranking. Friendly games are stats only. {friendIds.length} friends ready</Text>
         </View>
         <View style={styles.wallet}>
           <Text style={styles.walletValue}>{friendIds.length}</Text>
@@ -124,11 +132,11 @@ export default function PlayScreen() {
         </View>
       </View>
 
-      <CollapsibleSection title="Courts Available Tonight" action={`${filteredCourts.length} courts`} defaultOpen>
+      <CollapsibleSection title="Suggested Qatar Courts" action={`${filteredCourts.length} courts`} defaultOpen>
         {filteredCourts.length ? (
           <HorizontalCardRail>
             {filteredCourts.slice(0, 6).map((court) => (
-              <CourtCard key={court.id} court={court} onOpen={() => openCourt(court.id)} onBook={() => openBookingSheet(court)} onStartRanked={() => startRanked(court.id)} />
+              <CourtCard key={court.id} court={court} onOpen={() => openCourt(court.id)} onBook={() => openBookingSheet(court)} onStartRanked={() => startOfficial(court.id)} />
             ))}
           </HorizontalCardRail>
         ) : (
@@ -149,7 +157,7 @@ export default function PlayScreen() {
                 <Text numberOfLines={1} style={styles.playerMeta}>{player.level} - {player.status === 'playingTonight' ? 'playing tonight' : player.status}</Text>
                 <View style={styles.playerActions}>
                   <PremiumButton label={isFriend ? 'Friend' : 'Add'} icon={isFriend ? 'account-check' : 'account-plus-outline'} variant={isFriend ? 'subtle' : 'secondary'} onPress={() => (isFriend ? removeFriend(player.id) : addFriend(player.id))} style={{ flex: 1 }} />
-                  <PremiumButton label="Challenge" icon="sword-cross" onPress={() => router.push(`/player/${player.id}`)} style={{ flex: 1 }} />
+                  <PremiumButton label="Friendly" icon="account-group-outline" onPress={() => router.push('/(tabs)/play')} style={{ flex: 1 }} />
                 </View>
               </Pressable>
             );
@@ -197,22 +205,21 @@ export default function PlayScreen() {
       <CollapsibleSection title="Top Courts This Week">
         <View style={styles.stack}>
           {courts.slice(0, 5).map((court) => (
-            <CourtCard key={court.id} compact court={court} onOpen={() => openCourt(court.id)} onBook={() => openBookingSheet(court)} onStartRanked={() => startRanked(court.id)} />
+            <CourtCard key={court.id} compact court={court} onOpen={() => openCourt(court.id)} onBook={() => openBookingSheet(court)} onStartRanked={() => startOfficial(court.id)} />
           ))}
         </View>
       </CollapsibleSection>
 
-      <ActionSheet visible={!!sheetCourt} title="Book externally" subtitle={sheetCourt ? `${sheetCourt.name} accepts bookings through ${sheetCourt.externalBooking}.` : undefined} onClose={() => setSheetCourt(null)}>
+      <ActionSheet visible={!!sheetCourt} title="Book via club" subtitle={sheetCourt ? `${sheetCourt.name} accepts bookings through ${sheetCourt.externalBooking}.` : undefined} onClose={() => setSheetCourt(null)}>
         {sheetCourt ? (
           <>
-            <Text style={styles.sheetText}>{sheetCourt.priceRange}. Booking is completed externally with the venue.</Text>
-            <TimeSlotChips slots={sheetCourt.availabilitySlots} selectedId={selectedSlot?.id} onSelect={setSelectedSlot} />
-            <PremiumButton label={selectedSlot ? `Open venue for ${selectedSlot.label}` : 'Open venue booking'} icon="open-in-new" onPress={openExternalBooking} />
+            <Text style={styles.sheetText}>{sheetCourt.priceRange}. Booking happens through the club's official channel. 974 Padel does not show live court availability.</Text>
+            <PremiumButton label="Book via club" icon="open-in-new" onPress={openExternalBooking} />
             <View style={styles.sheetActions}>
               <PremiumButton label="Instagram" variant="secondary" icon="instagram" onPress={() => openCourtLink(sheetCourt.instagramUrl)} style={{ flex: 1 }} />
               <PremiumButton label="Maps" variant="subtle" icon="map-marker-radius-outline" onPress={() => openCourtLink(sheetCourt.mapsUrl)} style={{ flex: 1 }} />
             </View>
-            <PremiumButton label="Start ranked match instead" variant="secondary" icon="trophy-outline" onPress={() => startRanked(sheetCourt.id)} />
+            <PremiumButton label="Find official tournament" variant="secondary" icon="trophy-outline" onPress={() => startOfficial(sheetCourt.id)} />
           </>
         ) : null}
       </ActionSheet>
@@ -256,6 +263,10 @@ const styles = StyleSheet.create({
   horizontal: { gap: 12, paddingRight: spacing.md },
   stack: { gap: 14 },
   quickGrid: { flexDirection: 'row', gap: 10 },
+  tournamentCard: { width: 244, backgroundColor: colors.card, borderRadius: radius.lg, padding: 14, borderWidth: 1, borderColor: colors.border, gap: 8 },
+  tournamentKicker: { color: colors.hotPink, fontWeight: '900', textTransform: 'uppercase', fontSize: 11 },
+  tournamentTitle: { color: colors.textPrimary, fontWeight: '900', fontSize: 18, lineHeight: 22 },
+  tournamentMeta: { color: colors.textSecondary, fontWeight: '800' },
   quickPressed: { transform: [{ scale: 0.975 }, { translateY: 1 }], shadowOpacity: 0.05 },
   modeRow: { flexDirection: 'row', padding: 4, borderRadius: radius.pill, backgroundColor: colors.glass, borderWidth: 1, borderColor: colors.border },
   modeChip: { flex: 1, alignItems: 'center', paddingVertical: 9, borderRadius: radius.pill },

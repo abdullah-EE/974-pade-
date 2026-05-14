@@ -11,18 +11,16 @@ import { PlayerAvatar } from '@/components/common/PlayerAvatar';
 import { PremiumButton } from '@/components/common/PremiumButton';
 import { ScreenTransitionWrapper } from '@/components/common/ScreenTransitionWrapper';
 import { SectionHeader } from '@/components/common/SectionHeader';
-import { TimeSlotChips } from '@/components/common/TimeSlotChips';
 import { useAppState } from '@/state/AppState';
 import { colors, radius, spacing } from '@/theme/tokens';
 import { centeredContent } from '@/theme/layout';
-import { AvailabilitySlot, Player } from '@/types/models';
+import { Player } from '@/types/models';
 
 export default function CourtDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { courts, matches, players, createChallenge, currentUser } = useAppState();
   const court = courts.find((item) => item.id === id) || courts[0];
   const [sheet, setSheet] = useState<'booking' | 'challenge' | null>(null);
-  const [selectedSlot, setSelectedSlot] = useState<AvailabilitySlot | null>(court.availabilitySlots.find((slot) => slot.status !== 'full') || null);
   const interested = court.interestedPlayerIds
     .map((playerId) => players.find((player) => player.id === playerId))
     .filter((player): player is Player => Boolean(player));
@@ -48,18 +46,17 @@ export default function CourtDetail() {
         </Pressable>
         <View style={styles.heroCopy}>
           <Text style={styles.title}>{court.name}</Text>
-          <Text style={styles.subtitle}>{court.area} - {court.indoor ? 'Indoor' : 'Outdoor'} - {court.availabilityStatus}</Text>
+          <Text style={styles.subtitle}>{court.area} - {court.indoor ? 'Indoor' : 'Outdoor'} - club booking</Text>
         </View>
       </View>
 
       <Text style={styles.description}>{court.description}</Text>
-      <TimeSlotChips slots={court.availabilitySlots} />
 
       <View style={styles.actions}>
-        <PremiumButton label="Book externally" icon="open-in-new" onPress={() => setSheet('booking')} style={{ flex: 1 }} />
-        <PremiumButton label="Submit Match Here" variant="secondary" icon="clipboard-check-outline" onPress={() => router.push({ pathname: '/(tabs)/submit', params: { courtId: court.id } })} style={{ flex: 1 }} />
+        <PremiumButton label="Book via club" icon="open-in-new" onPress={() => setSheet('booking')} style={{ flex: 1 }} />
+        <PremiumButton label="View tournaments" variant="secondary" icon="trophy-outline" onPress={() => router.push('/(tabs)/tournaments')} style={{ flex: 1 }} />
       </View>
-      <PremiumButton label="Challenge Players Here" variant="subtle" icon="sword-cross" onPress={() => setSheet('challenge')} />
+      <PremiumButton label="Create friendly here" variant="subtle" icon="account-group-outline" onPress={() => setSheet('challenge')} />
 
       <View>
         <SectionHeader title="Amenities" />
@@ -86,7 +83,7 @@ export default function CourtDetail() {
       </View>
 
       <View>
-        <SectionHeader title="Recent Ranked Matches" />
+        <SectionHeader title="Recent Official Matches" />
         <View style={styles.matchStack}>
           {courtMatches.map((match) => (
             <MatchCard key={match.id} match={match} court={court} players={players} />
@@ -102,17 +99,16 @@ export default function CourtDetail() {
         </View>
       </View>
 
-      <ActionSheet visible={sheet === 'booking'} title="External booking" subtitle={`${court.externalBooking} opens outside 974 Padel.`} onClose={() => setSheet(null)}>
-        <Text style={styles.sheetText}>{court.priceRange}. Select a non-full slot, then continue externally with the venue.</Text>
-        <TimeSlotChips slots={court.availabilitySlots} selectedId={selectedSlot?.id} onSelect={setSelectedSlot} />
-        <PremiumButton label={selectedSlot ? `Open external booking for ${selectedSlot.label}` : 'Open external booking'} icon="open-in-new" onPress={openExternalBooking} />
+      <ActionSheet visible={sheet === 'booking'} title="Book via club" subtitle={`${court.externalBooking} opens outside 974 Padel.`} onClose={() => setSheet(null)}>
+        <Text style={styles.sheetText}>{court.priceRange}. Booking happens through the club's official channel. 974 Padel does not show live court availability.</Text>
+        <PremiumButton label="Book via club" icon="open-in-new" onPress={openExternalBooking} />
         <View style={styles.sheetActions}>
           <PremiumButton label="Instagram" variant="secondary" icon="instagram" onPress={() => openCourtLink(court.instagramUrl)} style={{ flex: 1 }} />
           <PremiumButton label="Maps" variant="subtle" icon="map-marker-radius-outline" onPress={() => openCourtLink(court.mapsUrl)} style={{ flex: 1 }} />
         </View>
       </ActionSheet>
 
-      <ActionSheet visible={sheet === 'challenge'} title="Challenge players" subtitle="Choose one of the players already interested in this court tonight." onClose={() => setSheet(null)}>
+      <ActionSheet visible={sheet === 'challenge'} title="Friendly play" subtitle="Choose a player for networking and profile stats only." onClose={() => setSheet(null)}>
         {interested.filter((player) => player.id !== currentUser.id).slice(0, 3).map((player) => (
           <Pressable
             key={player.id}
@@ -122,7 +118,7 @@ export default function CourtDetail() {
                 courtId: court.id,
                 startsAt: '2026-05-12T20:30:00+03:00',
                 level: player.level,
-                note: `Ranked challenge at ${court.name}.`,
+                note: `Friendly match at ${court.name}. Stats only, no official ranking.`,
                 privacy: 'Private invite',
               });
               setSheet(null);

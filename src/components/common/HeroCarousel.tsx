@@ -11,17 +11,17 @@ const heroCopy = [
   {
     kicker: 'Court discovery',
     title: 'Find a padel court in Qatar',
-    subtitle: 'Book externally, open ranked games, and climb the Qatar leaderboard.',
+    subtitle: 'Book through clubs, find players, and enter official events.',
   },
   {
     kicker: 'Player network',
     title: 'Find rivals ready tonight',
-    subtitle: 'Search players, add friends, and challenge the right level near you.',
+    subtitle: 'Search players, message first, and create friendly games at your level.',
   },
   {
     kicker: 'Verified ranking',
-    title: 'Submit proof after every match',
-    subtitle: 'Attach match proof, confirm results, and turn real games into rating movement.',
+    title: 'Climb through official events',
+    subtitle: 'Verified tournaments and approved club events are the only ranking source.',
   },
   {
     kicker: 'Coaching and clips',

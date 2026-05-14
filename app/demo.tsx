@@ -5,6 +5,7 @@ import { colors, radius, spacing } from '@/theme/tokens';
 
 const DEMO_KEY = '974early';
 const DEMO_STORAGE_KEY = '974-padel-demo-access';
+const DEMO_APP_VERSION = '2026-05-14-current-app';
 const demoIframeStyle = {
   width: '100%',
   height: '100%',
@@ -28,7 +29,7 @@ export default function DemoRoute() {
   const routeKey = firstParam(params.key);
   const webKey = getWebSearchKey();
   const hasAccess = (webKey ?? routeKey) === DEMO_KEY;
-  const demoFrameSrc = useMemo(() => `/courts?demo=1&key=${DEMO_KEY}`, []);
+  const demoFrameSrc = useMemo(() => `/courts?demo=1&key=${DEMO_KEY}&v=${DEMO_APP_VERSION}`, []);
   const pagePadding = desktop ? 18 : 8;
   const backButtonSpace = 56;
   const availableFrameWidth = Math.max(300, width - pagePadding * 2);

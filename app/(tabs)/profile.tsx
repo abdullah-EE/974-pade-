@@ -237,7 +237,7 @@ export default function ProfileScreen() {
         </View>
       </CollapsibleSection>
 
-      <CollapsibleSection title="My Challenges" action={`${myChallenges.length} active`}>
+      <CollapsibleSection title="My Friendly Play" action={`${myChallenges.length} active`}>
         <View style={styles.stack}>
           {myChallenges.map((challenge) => {
             const opponent = players.find((player) => player.id === (challenge.from === me.id ? challenge.to : challenge.from)) || players[1];
@@ -280,7 +280,7 @@ export default function ProfileScreen() {
       <CollapsibleSection title="Wallet/Credits" action={`${wallet.credits} 974 Credits`} defaultOpen>
         <View style={styles.walletPanel}>
           <AnimatedNumber value={wallet.credits} style={styles.walletBig} />
-          <Text style={styles.walletCopy}>Earned from verified matches, streaks, referrals, tournaments, and clips. Credits unlock cosmetics and perks only, never ranking.</Text>
+          <Text style={styles.walletCopy}>Earned from official verified events, referrals, and clips. Friendly results update profile stats only. Credits unlock cosmetics and perks, never ranking.</Text>
         </View>
       </CollapsibleSection>
 

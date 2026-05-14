@@ -66,7 +66,7 @@ export default function RankingsScreen() {
           <AnimatedNumber value={currentUser.weeklyPoints || 0} style={styles.statusValue} />
         </View>
         <View style={styles.statusProgress}>
-          <Text style={styles.statusHint}>Confirmed matches move rating. Pending or disputed results do not.</Text>
+          <Text style={styles.statusHint}>Only verified tournaments and approved club events affect official ranking. Friendly matches never move rating.</Text>
           <ProgressBar value={Math.min(100, Math.max(8, ((currentUser.weeklyPoints || 0) / 500) * 100))} />
         </View>
       </View>

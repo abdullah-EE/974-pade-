@@ -5,7 +5,6 @@ import { Court } from '@/types/models';
 import { colors, radius, shadow } from '@/theme/tokens';
 import { ImageWithFallback } from './ImageWithFallback';
 import { PremiumButton } from './PremiumButton';
-import { TimeSlotChips } from './TimeSlotChips';
 
 export function CourtCard({ court, onOpen, onBook, onStartRanked, compact = false }: { court: Court; onOpen: () => void; onBook: () => void; onStartRanked: () => void; compact?: boolean }) {
   const [hovered, setHovered] = useState(false);
@@ -26,13 +25,12 @@ export function CourtCard({ court, onOpen, onBook, onStartRanked, compact = fals
               <MaterialCommunityIcons name={court.indoor ? 'home-roof' : 'weather-night'} size={14} color={colors.primary} />
               <Text style={styles.badgeText}>{court.indoor ? 'Indoor' : 'Outdoor'}</Text>
             </View>
-            <Text style={styles.status}>{court.availabilityStatus}</Text>
+            <Text style={styles.status}>Club booking</Text>
           </View>
         </View>
-        <TimeSlotChips slots={court.availabilitySlots} />
         <View style={styles.actions}>
-          <PremiumButton label="Book externally" icon="open-in-new" onPress={onBook} style={{ flex: 1 }} />
-          <PremiumButton label="Start ranked" variant="secondary" icon="trophy-outline" onPress={onStartRanked} style={{ flex: 1 }} />
+          <PremiumButton label="Book via club" icon="open-in-new" onPress={onBook} style={{ flex: 1 }} />
+          <PremiumButton label="Official events" variant="secondary" icon="trophy-outline" onPress={onStartRanked} style={{ flex: 1 }} />
         </View>
       </View>
     </Pressable>

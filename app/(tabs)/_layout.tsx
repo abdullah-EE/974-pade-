@@ -12,7 +12,7 @@ const icon =
 export default function TabsLayout() {
   return (
     <Tabs
-      initialRouteName="courts"
+      initialRouteName="index"
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.hotPink,
@@ -33,12 +33,14 @@ export default function TabsLayout() {
         tabBarBackground: () => <BlurView tint="dark" intensity={72} style={StyleSheet.absoluteFill} />,
       }}
     >
-      <Tabs.Screen name="courts" options={{ title: 'Play', tabBarIcon: icon('stadium') }} />
+      <Tabs.Screen name="index" options={{ title: 'Home', tabBarIcon: icon('home-variant-outline') }} />
+      <Tabs.Screen name="tournaments" options={{ title: 'Tournaments', tabBarIcon: icon('trophy-outline') }} />
       <Tabs.Screen name="leaderboard" options={{ title: 'Rankings', tabBarIcon: icon('podium') }} />
-      <Tabs.Screen name="submit" options={{ title: 'Submit', tabBarIcon: icon('clipboard-check-outline') }} />
-      <Tabs.Screen name="challenges" options={{ title: 'Challenges', tabBarIcon: icon('sword-cross') }} />
+      <Tabs.Screen name="play" options={{ title: 'Play', tabBarIcon: icon('account-group-outline') }} />
       <Tabs.Screen name="profile" options={{ title: 'Profile', tabBarIcon: icon('account-circle-outline') }} />
-      <Tabs.Screen name="index" options={{ href: null }} />
+      <Tabs.Screen name="courts" options={{ href: null }} />
+      <Tabs.Screen name="submit" options={{ href: null }} />
+      <Tabs.Screen name="challenges" options={{ href: null }} />
     </Tabs>
   );
 }

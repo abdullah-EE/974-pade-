@@ -17,6 +17,9 @@ export const matchService = {
           gps_accuracy_m: match.gpsVerification?.accuracy ? Math.round(match.gpsVerification.accuracy) : undefined,
           status: 'pending_opponent',
           starts_at: match.startsAt,
+          ranking_source: match.rankingSource || 'friendly',
+          tournament_id: match.tournamentId,
+          friendly_stats_only: match.friendlyStatsOnly ?? match.rankingSource === 'friendly',
         });
         await Promise.all([
           ...match.teamA.map((profileId) => supabaseRest.insert('match_players', { match_id: created.id, profile_id: profileId, team: 'A' })),

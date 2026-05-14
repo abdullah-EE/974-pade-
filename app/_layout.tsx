@@ -27,9 +27,10 @@ export default function RootLayout() {
   const showInvestorShell = Platform.OS === 'web';
   const desktop = width >= 900;
   const key = getWebSearchKey() ?? firstParam(params.key);
+  const isDemoFrame = firstParam(params.demo) === '1';
   const isDemoPage = pathname === '/demo';
   const hasKeyAccess = key === DEMO_KEY;
-  const isDemoAppRoute = showInvestorShell && !isDemoPage && pathname !== '/' && (hasKeyAccess || storedDemoAccess);
+  const isDemoAppRoute = showInvestorShell && !isDemoPage && (pathname !== '/' || isDemoFrame) && (hasKeyAccess || storedDemoAccess);
   const appStack = (
     <>
       <StatusBar style="light" />
